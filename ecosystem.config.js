@@ -1,5 +1,3 @@
-// PM2 — Haute disponibilité multi-instances
-// Lancer : pm2 start ecosystem.config.js
 module.exports = {
   apps: [
     {
@@ -11,7 +9,7 @@ module.exports = {
       max_memory_restart: '512M',
       env: {
         NODE_ENV: 'production',
-        CLUSTER: 'false' // PM2 gère déjà le cluster
+        CLUSTER: 'false'
       },
       error_file: 'logs/err.log',
       out_file: 'logs/out.log',

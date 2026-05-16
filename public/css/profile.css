@@ -1,5 +1,3 @@
-/* link2me — profile.css */
-
 html, body { margin: 0; padding: 0; min-height: 100vh; }
 body.profile-body {
   font-family: var(--font, 'Inter', sans-serif);
@@ -29,7 +27,6 @@ body.profile-body {
   pointer-events: none; z-index: 9999;
 }
 
-/* === Splash === */
 .splash {
   position: fixed; inset: 0; z-index: 100;
   display: flex; align-items: center; justify-content: center;
@@ -79,7 +76,6 @@ body.profile-body {
 }
 @keyframes blink { 50% { opacity: 0.35; } }
 
-/* === Profile === */
 .profile {
   flex: 1;
   width: 100%;
@@ -141,7 +137,6 @@ body.profile-body {
   max-width: 440px;
 }
 
-/* Socials */
 .socials {
   list-style: none; padding: 0; margin: 0 0 1.8rem;
   display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
@@ -161,7 +156,6 @@ body.profile-body {
   box-shadow: 0 12px 30px -8px var(--accent);
 }
 
-/* Custom links — full-width buttons */
 .custom-links {
   list-style: none; padding: 0; margin: 0 0 2rem;
   display: flex; flex-direction: column; gap: 10px;
@@ -202,7 +196,6 @@ body.profile-body {
   font-weight: 700;
 }
 
-/* === Username effects === */
 .fx-username-glow {
   text-shadow: 0 0 30px var(--accent);
 }
@@ -240,7 +233,6 @@ body.profile-body {
   84% { clip-path: inset(50% 0 30% 0); transform: translate(3px,0); }
 }
 
-/* === Cursor === */
 body.fx-cursor-trail .cursor-fx::after,
 body.fx-cursor-glow  .cursor-fx::after {
   content: '';
@@ -256,7 +248,6 @@ body.fx-cursor-glow  .cursor-fx::after {
 }
 body.fx-cursor-glow .cursor-fx::after { filter: blur(28px); width: 60px; height: 60px; margin: -30px; opacity: 0.5; }
 
-/* === Player === */
 .player {
   position: fixed;
   bottom: 16px; left: 16px;

@@ -9,7 +9,7 @@ class Profile {
     Object.assign(this, row);
     for (const f of JSON_FIELDS) {
       if (typeof this[f] === 'string') {
-        try { this[f] = JSON.parse(this[f]); } catch { /* keep raw */ }
+        try { this[f] = JSON.parse(this[f]); } catch { }
       }
     }
     this.splash_enabled = !!this.splash_enabled;

@@ -9,8 +9,8 @@ const Deezer     = require('../services/DeezerService');
 const GhStorage  = require('../services/GitHubStorageService');
 const Logger     = require('../utils/Logger');
 
-const MAX_MEDIA = 98 * 1024 * 1024;   // 98 Mo — fichiers lourds (bg vidéo/gif)
-const MAX_IMAGE = 8  * 1024 * 1024;   // 8 Mo  — avatar / bannière (avant redimensionnement)
+const MAX_MEDIA = 98 * 1024 * 1024;
+const MAX_IMAGE = 8  * 1024 * 1024;
 
 const VALID_BG_TYPES    = new Set(['color', 'gradient', 'image']);
 const VALID_USERNAME_FX = new Set(['none', 'glow', 'shimmer', 'rainbow', 'glitch']);
@@ -24,7 +24,6 @@ const SOCIAL_PLATFORMS = new Set([
   'snapchat', 'kick', 'roblox', 'steam', 'email', 'website'
 ]);
 
-// Extension depuis le MIME type
 const EXT_MAP = {
   'image/png':  '.png',  'image/jpeg':  '.jpg',  'image/webp': '.webp',
   'image/gif':  '.gif',  'image/avif':  '.avif',
@@ -118,13 +117,6 @@ class ApiController {
     res.json({ ok: true, profile });
   }
 
-  /**
-   * Upload avatar, bannière ou média de fond (image/gif/vidéo).
-   * Stocke sur GitHub (branche "uploads") et retourne l'URL raw.githubusercontent.com.
-   * Fallback : stockage local si GitHub n'est pas configuré.
-   *
-   * kinds : 'avatar' | 'banner' | 'bg'
-   */
   static async uploadImage(req, res) {
     if (!req.file) return res.status(400).json({ error: 'no_file' });
 
@@ -134,13 +126,11 @@ class ApiController {
     const mime = req.file.mimetype || '';
     let buffer = req.file.buffer;
 
-    // ---- Validations taille ----
     const limit = kind === 'bg' ? MAX_MEDIA : MAX_IMAGE;
     if (buffer.length > limit) {
       return res.status(400).json({ error: 'file_too_large', max: limit });
     }
 
-    // ---- Traitement selon le kind ----
     let ext;
 
     if (kind === 'bg') {
@@ -148,9 +138,7 @@ class ApiController {
         return res.status(400).json({ error: 'unsupported_type' });
       }
       ext = EXT_MAP[mime] || '.bin';
-      // Pas de conversion — on pousse le fichier brut
     } else {
-      // avatar / banner : on convertit en WebP via sharp
       if (!IMAGE_MIMES.has(mime) && !mime.startsWith('image/')) {
         return res.status(400).json({ error: 'unsupported_type' });
       }
@@ -170,7 +158,6 @@ class ApiController {
     const filename = `${kind}-${hash}${ext}`;
     const ghPath  = `uploads/${req.user.id}/${filename}`;
 
-    // ---- Stockage GitHub (obligatoire) ----
     if (!GhStorage.isConfigured()) {
       return res.status(503).json({ error: 'github_not_configured' });
     }

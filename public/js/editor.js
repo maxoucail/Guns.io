@@ -9,7 +9,6 @@
     'soundcloud','github','telegram','snapchat','kick','roblox','steam','email','website'
   ];
 
-  // ---------- Save (debounced) ----------
   let saveTimer;
   const queueSave = (patch) => {
     Object.assign(pendingPatch, patch);
@@ -49,7 +48,6 @@
     }, 350);
   };
 
-  // ---------- Tabs ----------
   document.querySelectorAll('.tab').forEach((b) => {
     b.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === b));
@@ -58,7 +56,6 @@
     });
   });
 
-  // ---------- Bio + splash + toggles ----------
   const bind = (id, key, opts = {}) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -82,7 +79,6 @@
   bind('f-cursor_effect', 'cursor_effect');
   bind('f-particles', 'particles');
 
-  // Set initial select values
   const setSelectVal = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
   setSelectVal('f-username_effect', profile.username_effect);
   setSelectVal('f-cursor_effect', profile.cursor_effect);
@@ -95,7 +91,6 @@
     queueSave({ music_volume: +volEl.value });
   });
 
-  // ---------- Background ----------
   const bgSeg = document.querySelector('[data-seg="bg_type"]');
   const setSegActive = (type) => {
     bgSeg.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.val === type));
@@ -106,7 +101,6 @@
     b.addEventListener('click', () => {
       const t = b.dataset.val;
       setSegActive(t);
-      // Switch bg_value en cohérence
       let v = '';
       if (t === 'color') v = document.getElementById('bg-color').value;
       else if (t === 'gradient') v = profile.bg_type === 'gradient' ? profile.bg_value : 'linear-gradient(135deg,#7c5cff,#00d4ff)';
@@ -135,25 +129,21 @@
     });
   }
 
-  // ---------- Uploads ----------
   document.querySelectorAll('[data-upload]').forEach(inp => {
     inp.addEventListener('change', () => {
       const file = inp.files?.[0];
       if (!file) return;
       const kind = inp.dataset.upload;
-
       if (kind === 'bg') {
-        // Upload lourd avec barre de progression (XHR)
         uploadWithProgress(file, kind);
       } else {
-        // Avatar / bannière — fetch simple
-        uploadSimple(file, kind, inp);
+        uploadSimple(file, kind);
       }
       inp.value = '';
     });
   });
 
-  async function uploadSimple(file, kind, inp) {
+  async function uploadSimple(file, kind) {
     const fd = new FormData();
     fd.append('file', file);
     fd.append('kind', kind);
@@ -196,7 +186,6 @@
       const p = Math.round(e.loaded / e.total * 100);
       fill.style.width = p + '%';
       pct.textContent = p + '%';
-      // Au-delà de 100% upload = traitement serveur (push GitHub en cours)
       if (p === 100) {
         setSaveState('saving', 'Push GitHub…');
         pct.textContent = 'Traitement…';
@@ -227,7 +216,6 @@
     xhr.send(fd);
   }
 
-  // ---------- Music search ----------
   const musicQ = document.getElementById('music-q');
   const musicResults = document.getElementById('music-results');
   let musicTimer;
@@ -298,7 +286,6 @@
     renderMusicCurrent(null);
   });
 
-  // ---------- Social links ----------
   const socialGrid = document.getElementById('social-grid');
   let socials = Array.isArray(profile.social_links) ? [...profile.social_links] : [];
 
@@ -334,7 +321,6 @@
   });
   renderSocials();
 
-  // ---------- Custom links ----------
   const customList = document.getElementById('custom-list');
   let customs = Array.isArray(profile.custom_links) ? [...profile.custom_links] : [];
 
@@ -367,7 +353,6 @@
   });
   renderCustoms();
 
-  // ---------- Utils ----------
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }

@@ -45,7 +45,6 @@ class Server {
     [this.config.paths.data, this.config.paths.uploads].forEach((p) => {
       if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
     });
-    // Touche la DB pour s'assurer qu'elle est initialisée dans ce worker
     Db.prepare('SELECT 1').get();
   }
 

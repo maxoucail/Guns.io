@@ -1,4 +1,3 @@
-/* Particules canvas + sparkle cursor. Lightweight, pas de dep. */
 (() => {
   const P = window.__PROFILE__ || {};
   const canvas = document.getElementById('particles-canvas');
@@ -88,7 +87,6 @@
   }
   requestAnimationFrame(loop);
 
-  // Sparkle cursor effect (DOM-based)
   if (document.body.classList.contains('fx-cursor-sparkle')) {
     document.addEventListener('mousemove', (e) => {
       if (Math.random() > 0.4) return;

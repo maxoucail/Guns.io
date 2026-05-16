@@ -3,13 +3,6 @@
 const axios = require('axios');
 const Logger = require('../utils/Logger');
 
-/**
- * Deezer fournit une API publique sans clé, avec previews 30s.
- * Les previews de 30s sont autorisées pour intégration publique côté
- * client (lecture en streaming depuis cdns-preview-*.dzcdn.net) tant
- * qu'on n'archive pas le fichier. C'est l'équivalent légal du sample
- * sur Spotify / Apple Music.
- */
 class DeezerService {
   constructor() {
     this.client = axios.create({

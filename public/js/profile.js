@@ -2,14 +2,12 @@
   const P = window.__PROFILE__ || {};
   const splash = document.getElementById('splash');
   const profile = document.getElementById('profile');
-  const player = document.getElementById('player');
   const audio = document.getElementById('audio');
   const toggle = document.getElementById('player-toggle');
   const icPlay = document.getElementById('ic-play');
   const icPause = document.getElementById('ic-pause');
   const cover = document.querySelector('.player-cover');
 
-  // Iframe preview : pas de splash
   const previewMode = new URLSearchParams(location.search).get('preview') === '1';
 
   const enter = () => {
@@ -40,7 +38,7 @@
       icPlay.style.display = 'none';
       icPause.style.display = '';
       if (cover) cover.classList.add('spin');
-    }).catch(() => { /* navigateur bloque, attendre interaction */ });
+    }).catch(() => {});
   };
 
   if (toggle) {
@@ -55,7 +53,6 @@
     });
   }
 
-  // Cursor effect tracking
   if (document.body.classList.contains('fx-cursor-trail') || document.body.classList.contains('fx-cursor-glow')) {
     const fx = document.querySelector('.cursor-fx');
     document.addEventListener('mousemove', (e) => {

@@ -1,5 +1,4 @@
 (() => {
-  // Petit effet : préview qui suit légèrement le curseur
   const win = document.querySelector('.preview-window');
   if (!win) return;
   document.addEventListener('mousemove', (e) => {
