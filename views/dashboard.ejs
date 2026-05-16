@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body class="page-dashboard">
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <%- include('partials/nav') %>
+
+  <main class="dash">
+    <header class="dash-head">
+      <div>
+        <h1 class="display small">Salut <span class="gradient-text">@<%= user.username %></span></h1>
+        <p class="lead small">Ton URL : <a class="link" href="/<%= user.username %>" target="_blank" rel="noopener">link2me.fr/<%= user.username %></a></p>
+      </div>
+      <div class="dash-actions">
+        <a class="btn" href="/editor">Personnaliser</a>
+        <a class="btn ghost" href="/<%= user.username %>" target="_blank" rel="noopener">Voir en live</a>
+      </div>
+    </header>
+
+    <div class="dash-grid">
+      <article class="card stat">
+        <span class="stat-label">Vues totales</span>
+        <span class="stat-value"><%= profile.views.toLocaleString('fr-FR') %></span>
+      </article>
+      <article class="card stat">
+        <span class="stat-label">Liens sociaux</span>
+        <span class="stat-value"><%= (profile.social_links || []).length %></span>
+      </article>
+      <article class="card stat">
+        <span class="stat-label">Liens custom</span>
+        <span class="stat-value"><%= (profile.custom_links || []).length %></span>
+      </article>
+      <article class="card stat">
+        <span class="stat-label">Musique</span>
+        <span class="stat-value mini">
+          <% if (profile.music_track && profile.music_track.title) { %>
+            <%= profile.music_track.title %>
+          <% } else { %>
+            <em class="muted">aucune</em>
+          <% } %>
+        </span>
+      </article>
+    </div>
+
+    <section class="card big-card">
+      <h2>Prêt à customiser ?</h2>
+      <p>Ouvre l'éditeur. Tout est en live : tu changes à gauche, tu vois à droite.</p>
+      <a class="btn big" href="/editor">Ouvrir l'éditeur</a>
+    </section>
+  </main>
+</body>
+</html>

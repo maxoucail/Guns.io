@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('partials/head') %>
+  <link rel="stylesheet" href="/static/css/editor.css" />
+</head>
+<body class="page-editor">
+  <div class="aurora dim" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <header class="editor-bar">
+    <a href="/dashboard" class="brand">
+      <span class="brand-mark"></span>
+      <span class="brand-name">link2me</span>
+    </a>
+    <div class="editor-url">link2me.fr/<strong>@<%= user.username %></strong></div>
+    <div class="editor-bar-actions">
+      <span class="save-state" id="save-state">Synchronisé</span>
+      <a class="btn ghost" href="/<%= user.username %>" target="_blank" rel="noopener">Voir le profil</a>
+      <a class="btn ghost" href="/dashboard">Quitter</a>
+    </div>
+  </header>
+
+  <main class="editor-shell">
+    <aside class="editor-panel" id="editor-panel">
+      <nav class="tabs">
+        <button class="tab active" data-tab="identity">Identité</button>
+        <button class="tab" data-tab="design">Design</button>
+        <button class="tab" data-tab="music">Musique</button>
+        <button class="tab" data-tab="links">Liens</button>
+        <button class="tab" data-tab="effects">Effets</button>
+      </nav>
+
+      <section class="tab-panel active" data-panel="identity">
+        <h3>Avatar</h3>
+        <div class="row">
+          <div class="thumb" id="thumb-avatar" style="background-image:url('<%= profile.avatar || '' %>')"></div>
+          <label class="btn ghost">
+            Changer
+            <input type="file" accept="image/*" data-upload="avatar" hidden />
+          </label>
+        </div>
+
+        <h3>Bannière (optionnelle)</h3>
+        <div class="row">
+          <div class="thumb wide" id="thumb-banner" style="background-image:url('<%= profile.banner || '' %>')"></div>
+          <label class="btn ghost">
+            Changer
+            <input type="file" accept="image/*" data-upload="banner" hidden />
+          </label>
+        </div>
+
+        <h3>Bio</h3>
+        <textarea
+          id="f-bio"
+          maxlength="500"
+          placeholder="Présente-toi en quelques mots..."
+        ><%= profile.bio %></textarea>
+
+        <h3>Splash screen</h3>
+        <label class="toggle">
+          <input type="checkbox" id="f-splash_enabled" <%= profile.splash_enabled ? 'checked' : '' %> />
+          <span>Afficher l'écran "click to enter"</span>
+        </label>
+        <input type="text" id="f-splash_text" maxlength="60" value="<%= profile.splash_text %>" placeholder="click to enter" />
+      </section>
+
+      <section class="tab-panel" data-panel="design">
+        <h3>Background</h3>
+        <div class="seg" data-seg="bg_type" data-value="<%= profile.bg_type %>">
+          <button data-val="color">Couleur</button>
+          <button data-val="gradient">Gradient</button>
+          <button data-val="image">Image</button>
+        </div>
+
+        <div class="bg-options">
+          <div data-bg="color">
+            <label>Couleur de fond</label>
+            <input type="color" id="bg-color" value="<%= profile.bg_type === 'color' && profile.bg_value ? profile.bg_value : '#0b0a14' %>" />
+          </div>
+          <div data-bg="gradient">
+            <div class="grad-presets" id="grad-presets">
+              <button style="background: linear-gradient(135deg,#7c5cff,#00d4ff)" data-val="linear-gradient(135deg,#7c5cff,#00d4ff)"></button>
+              <button style="background: linear-gradient(135deg,#ff6cab,#7366ff)" data-val="linear-gradient(135deg,#ff6cab,#7366ff)"></button>
+              <button style="background: linear-gradient(135deg,#ff9a44,#ff2d75)" data-val="linear-gradient(135deg,#ff9a44,#ff2d75)"></button>
+              <button style="background: linear-gradient(135deg,#0f2027,#2c5364)" data-val="linear-gradient(135deg,#0f2027,#2c5364)"></button>
+              <button style="background: linear-gradient(135deg,#000000,#1a1a2e)" data-val="linear-gradient(135deg,#000000,#1a1a2e)"></button>
+              <button style="background: linear-gradient(135deg,#11998e,#38ef7d)" data-val="linear-gradient(135deg,#11998e,#38ef7d)"></button>
+            </div>
+          </div>
+          <div data-bg="image">
+            <input type="text" id="bg-image-url" placeholder="https://... (lien direct image/vidéo .mp4)" value="<%= profile.bg_type === 'image' ? profile.bg_value : '' %>" />
+            <small class="hint">Astuce : tu peux mettre une URL .mp4, .webm ou .gif.</small>
+          </div>
+        </div>
+
+        <h3>Couleurs</h3>
+        <div class="row gap">
+          <label class="col">
+            <span>Accent</span>
+            <input type="color" id="f-accent_color" value="<%= profile.accent_color %>" />
+          </label>
+          <label class="col">
+            <span>Texte</span>
+            <input type="color" id="f-text_color" value="<%= profile.text_color %>" />
+          </label>
+        </div>
+
+        <h3>Police</h3>
+        <select id="f-font">
+          <% ['Inter','Geist','Space Grotesk','JetBrains Mono','Outfit','Poppins'].forEach(function(f){ %>
+            <option value="<%= f %>" <%= profile.font === f ? 'selected' : '' %>><%= f %></option>
+          <% }); %>
+        </select>
+      </section>
+
+      <section class="tab-panel" data-panel="music">
+        <h3>Musique de fond</h3>
+        <p class="hint">On utilise les <strong>previews 30s</strong> Deezer — c'est légal et gratuit.</p>
+
+        <div class="music-current" id="music-current">
+          <% if (profile.music_track && profile.music_track.title) { %>
+            <img src="<%= profile.music_track.cover || '' %>" alt="" />
+            <div>
+              <strong><%= profile.music_track.title %></strong>
+              <span><%= profile.music_track.artist %></span>
+            </div>
+            <button class="icon-btn" id="music-remove" title="Retirer">×</button>
+          <% } else { %>
+            <em class="muted">Aucune musique</em>
+          <% } %>
+        </div>
+
+        <input type="search" id="music-q" placeholder="Cherche un titre ou un artiste..." />
+        <ul class="music-results" id="music-results"></ul>
+
+        <h3>Lecture</h3>
+        <label class="toggle">
+          <input type="checkbox" id="f-music_autoplay" <%= profile.music_autoplay ? 'checked' : '' %> />
+          <span>Démarrer automatiquement (après le clic d'entrée)</span>
+        </label>
+        <label class="range">
+          <span>Volume <em id="vol-val"><%= profile.music_volume %></em>%</span>
+          <input type="range" min="0" max="100" id="f-music_volume" value="<%= profile.music_volume %>" />
+        </label>
+      </section>
+
+      <section class="tab-panel" data-panel="links">
+        <h3>Réseaux sociaux</h3>
+        <div class="social-grid" id="social-grid"></div>
+        <button class="btn ghost small" id="add-social">+ Ajouter un réseau</button>
+
+        <h3>Liens custom</h3>
+        <ul class="custom-list" id="custom-list"></ul>
+        <button class="btn ghost small" id="add-custom">+ Ajouter un lien</button>
+      </section>
+
+      <section class="tab-panel" data-panel="effects">
+        <h3>Effet du pseudo</h3>
+        <select id="f-username_effect">
+          <option value="none">Aucun</option>
+          <option value="glow">Glow</option>
+          <option value="shimmer">Shimmer</option>
+          <option value="rainbow">Rainbow</option>
+          <option value="glitch">Glitch</option>
+        </select>
+
+        <h3>Effet du curseur</h3>
+        <select id="f-cursor_effect">
+          <option value="none">Aucun</option>
+          <option value="trail">Trail</option>
+          <option value="sparkle">Sparkle</option>
+          <option value="glow">Glow</option>
+        </select>
+
+        <h3>Particules</h3>
+        <select id="f-particles">
+          <option value="none">Aucune</option>
+          <option value="stars">Étoiles</option>
+          <option value="snow">Neige</option>
+          <option value="bubbles">Bulles</option>
+          <option value="matrix">Matrix</option>
+        </select>
+      </section>
+    </aside>
+
+    <section class="editor-preview">
+      <div class="device">
+        <iframe id="preview-frame" src="/<%= user.username %>?preview=1" title="Aperçu"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    window.__INITIAL_PROFILE__ = <%- JSON.stringify(profile) %>;
+    window.__USERNAME__ = <%- JSON.stringify(user.username) %>;
+  </script>
+  <script src="/static/js/editor.js" defer></script>
+</body>
+</html>

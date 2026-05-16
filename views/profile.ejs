@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('partials/head') %>
+  <link rel="stylesheet" href="/static/css/profile.css" />
+  <style>
+    :root {
+      --accent: <%= profile.accent_color %>;
+      --text: <%= profile.text_color %>;
+      --font: '<%= profile.font %>', system-ui, sans-serif;
+    }
+    body {
+      <% if (profile.bg_type === 'color') { %>
+        background: <%= profile.bg_value || '#0b0a14' %>;
+      <% } else if (profile.bg_type === 'gradient') { %>
+        background: <%= profile.bg_value || 'linear-gradient(135deg,#0b0a14,#1a1a2e)' %>;
+      <% } else if (profile.bg_type === 'image' && profile.bg_value) { %>
+        background: #000;
+      <% } %>
+    }
+  </style>
+</head>
+<body class="profile-body fx-particles-<%= profile.particles %> fx-cursor-<%= profile.cursor_effect %>">
+
+  <% if (profile.bg_type === 'image' && profile.bg_value) { %>
+    <% if (/\.(mp4|webm|mov)$/i.test(profile.bg_value)) { %>
+      <video class="bg-media" autoplay muted loop playsinline poster="">
+        <source src="<%= profile.bg_value %>" />
+      </video>
+    <% } else { %>
+      <img class="bg-media" src="<%= profile.bg_value %>" alt="" />
+    <% } %>
+    <div class="bg-overlay"></div>
+  <% } %>
+
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
+  <div class="cursor-fx" aria-hidden="true"></div>
+
+  <% if (profile.splash_enabled) { %>
+    <div class="splash" id="splash">
+      <div class="splash-inner">
+        <div class="splash-avatar" style="background-image:url('<%= profile.avatar || '' %>')"></div>
+        <div class="splash-name fx-username-<%= profile.username_effect %>" data-text="@<%= user.username %>">@<%= user.username %></div>
+        <div class="splash-cta"><%= profile.splash_text || 'click to enter' %></div>
+      </div>
+    </div>
+  <% } %>
+
+  <main class="profile" id="profile" <%= profile.splash_enabled ? 'hidden' : '' %>>
+    <% if (profile.banner) { %>
+      <div class="banner" style="background-image:url('<%= profile.banner %>')"></div>
+    <% } %>
+
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <div class="avatar" style="background-image:url('<%= profile.avatar || user.avatar_url || '' %>')"></div>
+    </div>
+
+    <h1 class="name fx-username-<%= profile.username_effect %>" data-text="@<%= user.username %>">@<%= user.username %></h1>
+
+    <% if (profile.bio) { %>
+      <p class="bio"><%= profile.bio %></p>
+    <% } %>
+
+    <% var socials = profile.social_links || []; %>
+    <% if (socials.length) { %>
+      <ul class="socials">
+        <% socials.forEach(function(s) { %>
+          <li>
+            <a class="social social-<%= s.platform %>"
+               href="<%= SocialLinks.url(s.platform, s.value) %>"
+               target="_blank" rel="noopener noreferrer"
+               aria-label="<%= s.platform %>">
+              <%- SocialLinks.icon(s.platform) %>
+            </a>
+          </li>
+        <% }); %>
+      </ul>
+    <% } %>
+
+    <% var customs = profile.custom_links || []; %>
+    <% if (customs.length) { %>
+      <ul class="custom-links">
+        <% customs.forEach(function(c) { %>
+          <li><a class="custom-link" href="<%= c.url %>" target="_blank" rel="noopener noreferrer"><%= c.label %></a></li>
+        <% }); %>
+      </ul>
+    <% } %>
+
+    <div class="footer-meta">
+      <span class="views"><strong><%= profile.views.toLocaleString('fr-FR') %></strong> vues</span>
+      <a class="brand-tiny" href="/">link2me</a>
+    </div>
+  </main>
+
+  <% if (profile.music_track && profile.music_track.preview) { %>
+    <div class="player" id="player" data-volume="<%= profile.music_volume %>" data-autoplay="<%= profile.music_autoplay ? '1' : '0' %>">
+      <img class="player-cover" src="<%= profile.music_track.cover || '' %>" alt="" />
+      <div class="player-info">
+        <strong><%= profile.music_track.title %></strong>
+        <span><%= profile.music_track.artist %></span>
+      </div>
+      <button class="player-btn" id="player-toggle" aria-label="Lecture/pause">
+        <svg id="ic-play" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+        <svg id="ic-pause" viewBox="0 0 24 24" width="18" height="18" style="display:none"><path fill="currentColor" d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      </button>
+      <audio id="audio" preload="none">
+        <source src="<%= profile.music_track.preview %>" type="audio/mpeg" />
+      </audio>
+    </div>
+  <% } %>
+
+  <script>
+    window.__PROFILE__ = {
+      particles: <%- JSON.stringify(profile.particles) %>,
+      cursor: <%- JSON.stringify(profile.cursor_effect) %>,
+      accent: <%- JSON.stringify(profile.accent_color) %>,
+      splash: <%= profile.splash_enabled ? 'true' : 'false' %>,
+      autoplay: <%= profile.music_autoplay ? 'true' : 'false' %>,
+      volume: <%= profile.music_volume %>
+    };
+  </script>
+  <script src="/static/js/effects.js" defer></script>
+  <script src="/static/js/profile.js" defer></script>
+</body>
+</html>

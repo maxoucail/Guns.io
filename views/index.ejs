@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body class="page-landing">
+  <div class="aurora" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <%- include('partials/nav') %>
+
+  <main class="hero">
+    <span class="kicker">PREMIUM. GRATUIT. POUR DE VRAI.</span>
+    <h1 class="display">
+      Une page perso<br />
+      <span class="gradient-text">qui te ressemble</span>.
+    </h1>
+    <p class="lead">
+      Background, musique, effets, liens, animations. Tout est inclus, tout est libre.
+      Crée ta page en moins d'une minute — c'est ton URL : <code>link2me.fr/ton_pseudo</code>.
+    </p>
+    <div class="cta">
+      <a href="/login" class="btn big">Réclamer mon pseudo</a>
+      <a href="#features" class="btn big ghost">Voir les features</a>
+    </div>
+
+    <div class="preview-window" aria-hidden="true">
+      <div class="preview-bar">
+        <span></span><span></span><span></span>
+        <em>link2me.fr/toi</em>
+      </div>
+      <div class="preview-body">
+        <div class="preview-avatar"></div>
+        <div class="preview-name">@toi</div>
+        <div class="preview-bio">"démerde-toi" — fait avec amour</div>
+        <div class="preview-socials">
+          <i></i><i></i><i></i><i></i><i></i>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <section id="features" class="features">
+    <h2 class="section-title">Tout. Gratuit. <span class="gradient-text">Sérieux.</span></h2>
+    <div class="grid">
+      <article class="card">
+        <h3>Backgrounds vivants</h3>
+        <p>Couleur, gradient, image, vidéo, particules. Mets ce que tu veux.</p>
+      </article>
+      <article class="card">
+        <h3>Musique légale</h3>
+        <p>Cherche dans Deezer, ajoute un extrait 30s. Auto-play activable, volume au choix.</p>
+      </article>
+      <article class="card">
+        <h3>Effets cursor</h3>
+        <p>Trail, sparkle, glow. Le petit détail qui change tout.</p>
+      </article>
+      <article class="card">
+        <h3>Splash screen</h3>
+        <p>Une intro "click to enter" comme sur les vraies pages stylées.</p>
+      </article>
+      <article class="card">
+        <h3>Liens custom</h3>
+        <p>Tes réseaux + tes liens custom, joliment empilés.</p>
+      </article>
+      <article class="card">
+        <h3>Compteur de vues</h3>
+        <p>Sache combien de monde passe chez toi.</p>
+      </article>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>© <%= new Date().getFullYear() %> link2me</div>
+    <div class="footer-links">
+      <a href="/login">Connexion</a>
+      <a href="https://www.deezer.com" target="_blank" rel="noopener">Musique via Deezer</a>
+    </div>
+  </footer>
+
+  <script src="/static/js/landing.js" defer></script>
+</body>
+</html>

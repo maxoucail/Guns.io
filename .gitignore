@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+data/*.db
+data/*.db-journal
+data/sessions.db
+data/sessions.db-journal
+public/uploads/
+logs/
+*.log
+.DS_Store
+.vscode/
+.idea/

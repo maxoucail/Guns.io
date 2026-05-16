@@ -1,0 +1,20 @@
+<nav class="nav">
+  <a href="/" class="brand">
+    <span class="brand-mark"></span>
+    <span class="brand-name">link2me</span>
+  </a>
+  <div class="nav-actions">
+    <% if (typeof user !== 'undefined' && user) { %>
+      <% if (user.username) { %>
+        <a class="btn ghost" href="/<%= user.username %>" target="_blank" rel="noopener">Voir mon profil</a>
+        <a class="btn" href="/dashboard">Dashboard</a>
+      <% } else { %>
+        <a class="btn" href="/welcome">Choisir un pseudo</a>
+      <% } %>
+      <a class="btn ghost" href="/logout">Déco</a>
+    <% } else { %>
+      <a class="btn ghost" href="/login">Connexion</a>
+      <a class="btn" href="/login">Créer ma page</a>
+    <% } %>
+  </div>
+</nav>

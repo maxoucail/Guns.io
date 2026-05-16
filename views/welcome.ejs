@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body class="page-auth">
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <main class="auth-shell">
+    <h1 class="auth-title">Salut <%= user.display_name || 'toi' %></h1>
+    <p class="auth-sub">Choisis ton pseudo. C'est ton URL : <code>link2me.fr/<span id="preview-pseudo">pseudo</span></code></p>
+
+    <% if (error) { %>
+      <div class="alert">
+        <% if (error === 'taken') { %>Ce pseudo est déjà pris.<% } %>
+        <% if (error === 'too_short') { %>Trop court (min 3).<% } %>
+        <% if (error === 'too_long') { %>Trop long (max 20).<% } %>
+        <% if (error === 'invalid_chars') { %>Lettres, chiffres, _ ou . uniquement.<% } %>
+        <% if (error === 'reserved') { %>Ce pseudo est réservé.<% } %>
+        <% if (error === 'invalid') { %>Pseudo invalide.<% } %>
+      </div>
+    <% } %>
+
+    <form class="claim-form" method="post" action="/welcome">
+      <div class="claim-input">
+        <span class="prefix">link2me.fr/</span>
+        <input
+          name="username"
+          id="username"
+          type="text"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          minlength="3"
+          maxlength="20"
+          pattern="[a-zA-Z0-9_.]+"
+          required
+          placeholder="ton_pseudo"
+        />
+      </div>
+      <div class="claim-status" id="claim-status"></div>
+      <button class="btn big" type="submit">Réclamer ce pseudo</button>
+    </form>
+
+    <a href="/logout" class="back-link">← Me déconnecter</a>
+  </main>
+
+  <script src="/static/js/welcome.js" defer></script>
+</body>
+</html>
