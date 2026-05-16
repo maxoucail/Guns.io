@@ -1,11 +1,38 @@
 'use strict';
 
+const crypto = require('crypto');
 const { nanoid } = require('nanoid');
 const Db = require('../config/Database');
+const Config = require('../config/Config');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
 
 class AdminController {
+  static authPage(req, res) {
+    if (!req.user || !req.user.is_admin) return res.redirect('/dashboard');
+    if (req.session.admin_verified) return res.redirect('/admin');
+    res.render('admin/auth', { title: 'Accès Admin · link2me', user: req.user, error: req.query.error || null });
+  }
+
+  static verifyAuth(req, res) {
+    if (!req.user || !req.user.is_admin) return res.redirect('/dashboard');
+    const input = (req.body.password || '').trim();
+    const known = Config.adminPassword();
+    if (!known) return res.redirect('/admin/auth?error=not_configured');
+    const hashInput = crypto.createHash('sha256').update(input).digest();
+    const hashKnown = crypto.createHash('sha256').update(known).digest();
+    if (crypto.timingSafeEqual(hashInput, hashKnown)) {
+      req.session.admin_verified = true;
+      return res.redirect('/admin');
+    }
+    res.redirect('/admin/auth?error=wrong');
+  }
+
+  static logoutAdmin(req, res) {
+    delete req.session.admin_verified;
+    res.redirect('/dashboard');
+  }
+
   static dashboard(req, res) {
     const stats = {
       users: Db.prepare('SELECT COUNT(*) as n FROM users').get().n,

@@ -67,6 +67,9 @@ function build() {
   router.post('/api/profile', ensureAuth, ensureUsername, writeLimit, express.json({ limit: '256kb' }), ApiController.updateProfile);
   router.post('/api/upload',  ensureAuth, ensureUsername, writeLimit, upload.single('file'), ApiController.uploadImage);
 
+  router.get('/admin/auth',  ensureAuth, AdminController.authPage);
+  router.post('/admin/auth', ensureAuth, express.urlencoded({ extended: false }), AdminController.verifyAuth);
+  router.get('/admin/logout-admin', ensureAuth, AdminController.logoutAdmin);
   router.get('/admin/stop-impersonate', ensureAuth, AdminController.stopImpersonate);
   router.get('/admin',              ensureAdmin, adminLimit, AdminController.dashboard);
   router.get('/admin/users',        ensureAdmin, adminLimit, AdminController.listUsers);

@@ -17,6 +17,9 @@ function ensureAdmin(req, res, next) {
     if (req.accepts('html')) return res.status(403).redirect('/dashboard');
     return res.status(403).json({ error: 'forbidden' });
   }
+  if (!req.session.admin_verified) {
+    return res.redirect('/admin/auth');
+  }
   return next();
 }
 
