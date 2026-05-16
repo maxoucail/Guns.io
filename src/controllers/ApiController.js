@@ -6,6 +6,7 @@ const Profile    = require('../models/Profile');
 const User       = require('../models/User');
 const Validator  = require('../utils/Validator');
 const Deezer     = require('../services/DeezerService');
+const SoundCloud  = require('../services/SoundCloudService');
 const GhStorage  = require('../services/GitHubStorageService');
 const Logger     = require('../utils/Logger');
 
@@ -43,18 +44,24 @@ class ApiController {
 
   static async musicSearch(req, res) {
     const q = (req.query.q || '').trim();
-    const results = await Deezer.search(q, 12);
-    res.json({ results });
+    const [dz, sc] = await Promise.all([Deezer.search(q, 10), SoundCloud.search(q, 6)]);
+    res.json({ results: [...dz, ...sc] });
   }
 
   static updateProfile(req, res) {
     const data = req.body || {};
     const updates = {};
 
+    if ('avatar' in data) updates.avatar = data.avatar === null ? null : (Validator.safeUrl(data.avatar) || undefined);
+    if (updates.avatar === undefined && 'avatar' in data) delete updates.avatar;
+    if ('banner' in data) updates.banner = data.banner === null ? null : (Validator.safeUrl(data.banner) || undefined);
+    if (updates.banner === undefined && 'banner' in data) delete updates.banner;
+
     if ('bio' in data)            updates.bio = Validator.sanitizeText(String(data.bio || ''), 500);
     if ('splash_text' in data)    updates.splash_text = Validator.sanitizeText(String(data.splash_text || ''), 60);
     if ('splash_enabled' in data) updates.splash_enabled = !!data.splash_enabled;
     if ('music_autoplay' in data) updates.music_autoplay = !!data.music_autoplay;
+    if ('bio_widget' in data)     updates.bio_widget = !!data.bio_widget;
     if ('nsfw' in data)           updates.nsfw = !!data.nsfw;
 
     if ('accent_color' in data && Validator.hexColor(data.accent_color)) updates.accent_color = data.accent_color;

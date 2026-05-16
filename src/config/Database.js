@@ -55,11 +55,14 @@ class Db {
         custom_links   TEXT DEFAULT '[]',
         views          INTEGER DEFAULT 0,
         nsfw           INTEGER DEFAULT 0,
+        bio_widget     INTEGER DEFAULT 0,
         updated_at     INTEGER NOT NULL
       );
 
       CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
     `);
+    const cols = this.db.prepare("PRAGMA table_info(profiles)").all().map(c => c.name);
+    if (!cols.includes('bio_widget')) this.db.exec("ALTER TABLE profiles ADD COLUMN bio_widget INTEGER DEFAULT 0");
   }
 
   prepare(sql) { return this.db.prepare(sql); }

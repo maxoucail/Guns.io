@@ -14,7 +14,6 @@
     </a>
     <div class="editor-url">link2me.fr/<strong>@<%= user.username %></strong></div>
     <div class="editor-bar-actions">
-      <span class="save-state" id="save-state">Synchronisé</span>
       <a class="btn ghost" href="/<%= user.username %>" target="_blank" rel="noopener">Voir le profil</a>
       <a class="btn ghost" href="/dashboard">Quitter</a>
     </div>
@@ -33,20 +32,32 @@
       <section class="tab-panel active" data-panel="identity">
         <h3>Avatar</h3>
         <div class="row">
-          <div class="thumb" id="thumb-avatar" style="background-image:url('<%= profile.avatar || '' %>')"></div>
-          <label class="btn ghost">
-            Changer
-            <input type="file" accept="image/*" data-upload="avatar" hidden />
-          </label>
+          <div class="thumb" id="thumb-avatar" style="background-image:url('<%= profile.avatar || user.avatar_url || '' %>')"></div>
+          <div class="col">
+            <label class="btn ghost small">
+              Changer
+              <input type="file" accept="image/*" data-upload="avatar" hidden />
+            </label>
+            <% if (user.provider === 'discord' || user.provider === 'google') { %>
+            <button class="btn ghost small" id="avatar-from-provider">Photo <%= user.provider === 'discord' ? 'Discord' : 'Google' %></button>
+            <% } %>
+            <button class="btn ghost small danger" id="avatar-clear">Supprimer</button>
+          </div>
         </div>
 
-        <h3>Bannière (optionnelle)</h3>
+        <h3>Bannière <span class="hint-inline">(optionnelle)</span></h3>
         <div class="row">
           <div class="thumb wide" id="thumb-banner" style="background-image:url('<%= profile.banner || '' %>')"></div>
-          <label class="btn ghost">
-            Changer
-            <input type="file" accept="image/*" data-upload="banner" hidden />
-          </label>
+          <div class="col">
+            <label class="btn ghost small">
+              Changer
+              <input type="file" accept="image/*" data-upload="banner" hidden />
+            </label>
+            <% if (user.provider === 'discord' || user.provider === 'google') { %>
+            <button class="btn ghost small" id="banner-from-provider">Bannière <%= user.provider === 'discord' ? 'Discord' : 'Google' %></button>
+            <% } %>
+            <button class="btn ghost small danger" id="banner-clear">Supprimer</button>
+          </div>
         </div>
 
         <h3>Bio</h3>
@@ -55,6 +66,10 @@
           maxlength="500"
           placeholder="Présente-toi en quelques mots..."
         ><%= profile.bio %></textarea>
+        <label class="toggle" style="margin-top:8px">
+          <input type="checkbox" id="f-bio_widget" <%= profile.bio_widget ? 'checked' : '' %> />
+          <span>Afficher la bio en widget (avec bordure)</span>
+        </label>
 
         <h3>Splash screen</h3>
         <label class="toggle">
@@ -69,7 +84,7 @@
         <div class="seg" data-seg="bg_type" data-value="<%= profile.bg_type %>">
           <button data-val="color">Couleur</button>
           <button data-val="gradient">Gradient</button>
-          <button data-val="image">Image</button>
+          <button data-val="image">Image / Vidéo</button>
         </div>
 
         <div class="bg-options">
@@ -86,10 +101,22 @@
               <button style="background: linear-gradient(135deg,#000000,#1a1a2e)" data-val="linear-gradient(135deg,#000000,#1a1a2e)"></button>
               <button style="background: linear-gradient(135deg,#11998e,#38ef7d)" data-val="linear-gradient(135deg,#11998e,#38ef7d)"></button>
             </div>
+            <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+              <label style="font-size:0.8rem;color:var(--fg-2)">Couleur 1</label>
+              <input type="color" id="grad-c1" value="#7c5cff" />
+              <label style="font-size:0.8rem;color:var(--fg-2)">Couleur 2</label>
+              <input type="color" id="grad-c2" value="#00d4ff" />
+              <select id="grad-dir" style="flex:1">
+                <option value="135deg">Diagonale ↘</option>
+                <option value="90deg">Vertical ↓</option>
+                <option value="180deg">Horizontal →</option>
+                <option value="45deg">Diagonale ↗</option>
+              </select>
+            </div>
           </div>
           <div data-bg="image">
-            <input type="text" id="bg-image-url" placeholder="https://... (lien direct image/vidéo .mp4)" value="<%= profile.bg_type === 'image' ? profile.bg_value : '' %>" />
-            <small class="hint">Astuce : tu peux coller une URL ou uploader un fichier ci-dessous.</small>
+            <input type="text" id="bg-image-url" placeholder="https://... (image ou vidéo .mp4)" value="<%= profile.bg_type === 'image' ? profile.bg_value : '' %>" />
+            <small class="hint">Tu peux coller une URL ou uploader un fichier ci-dessous.</small>
             <div class="bg-upload-row">
               <label class="btn ghost small" id="bg-upload-label">
                 <span id="bg-upload-txt">Uploader image / gif / vidéo (max 98 Mo)</span>
@@ -125,7 +152,7 @@
 
       <section class="tab-panel" data-panel="music">
         <h3>Musique de fond</h3>
-        <p class="hint">On utilise les <strong>previews 30s</strong> Deezer — c'est légal et gratuit.</p>
+        <p class="hint">Previews 30s via <strong>Deezer</strong><% if (soundcloudEnabled) { %> + <strong>SoundCloud</strong><% } %> — légal et gratuit.</p>
 
         <div class="music-current" id="music-current">
           <% if (profile.music_track && profile.music_track.title) { %>
@@ -159,7 +186,7 @@
         <div class="social-grid" id="social-grid"></div>
         <button class="btn ghost small" id="add-social">+ Ajouter un réseau</button>
 
-        <h3>Liens custom</h3>
+        <h3>Liens personnalisés</h3>
         <ul class="custom-list" id="custom-list"></ul>
         <button class="btn ghost small" id="add-custom">+ Ajouter un lien</button>
       </section>
@@ -177,9 +204,9 @@
         <h3>Effet du curseur</h3>
         <select id="f-cursor_effect">
           <option value="none">Aucun</option>
-          <option value="trail">Trail</option>
-          <option value="sparkle">Sparkle</option>
-          <option value="glow">Glow</option>
+          <option value="trail">Trail (traîne)</option>
+          <option value="sparkle">Sparkle (étincelles)</option>
+          <option value="glow">Glow (halo)</option>
         </select>
 
         <h3>Particules</h3>
@@ -200,9 +227,19 @@
     </section>
   </main>
 
+  <div class="save-bar" id="save-bar">
+    <span class="save-bar-msg">Tu as des modifications non sauvegardées</span>
+    <div class="save-bar-actions">
+      <button class="btn ghost" id="save-abort">Annuler</button>
+      <button class="btn primary" id="save-confirm">Sauvegarder</button>
+    </div>
+  </div>
+
   <script>
     window.__INITIAL_PROFILE__ = <%- safeJSON(profile) %>;
     window.__USERNAME__ = <%- safeJSON(user.username) %>;
+    window.__USER_AVATAR__ = <%- safeJSON(user.avatar_url || null) %>;
+    window.__USER_PROVIDER__ = <%- safeJSON(user.provider) %>;
   </script>
   <script src="/static/js/editor.js" defer></script>
 </body>

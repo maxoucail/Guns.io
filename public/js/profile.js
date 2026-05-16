@@ -53,11 +53,17 @@
     });
   }
 
-  if (document.body.classList.contains('fx-cursor-trail') || document.body.classList.contains('fx-cursor-glow')) {
-    const fx = document.querySelector('.cursor-fx');
-    document.addEventListener('mousemove', (e) => {
-      fx.style.setProperty('--cx', e.clientX + 'px');
-      fx.style.setProperty('--cy', e.clientY + 'px');
-    });
+  const fx = document.querySelector('.cursor-fx');
+  const cls = document.body.classList;
+  if (fx && (cls.contains('fx-cursor-trail') || cls.contains('fx-cursor-glow'))) {
+    const lag = cls.contains('fx-cursor-glow') ? 0.18 : 0.1;
+    let mx = -300, my = -300, cx = -300, cy = -300;
+    document.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+    (function tick() {
+      cx += (mx - cx) * lag;
+      cy += (my - cy) * lag;
+      fx.style.transform = `translate(${cx}px,${cy}px)`;
+      requestAnimationFrame(tick);
+    })();
   }
 })();

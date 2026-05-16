@@ -3,6 +3,7 @@
 const User = require('../models/User');
 const Profile = require('../models/Profile');
 const Validator = require('../utils/Validator');
+const Config = require('../config/Config');
 
 class ProfileController {
   static welcomePage(req, res) {
@@ -43,7 +44,8 @@ class ProfileController {
     res.render('editor', {
       title: 'Éditeur · link2me',
       user: req.user,
-      profile
+      profile,
+      soundcloudEnabled: Config.soundcloudEnabled()
     });
   }
 

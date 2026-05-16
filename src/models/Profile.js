@@ -15,6 +15,7 @@ class Profile {
     this.splash_enabled = !!this.splash_enabled;
     this.music_autoplay = !!this.music_autoplay;
     this.nsfw = !!this.nsfw;
+    this.bio_widget = !!this.bio_widget;
   }
 
   static getByUserId(userId) {
@@ -30,7 +31,7 @@ class Profile {
     const allowed = [
       'bio', 'avatar', 'banner', 'bg_type', 'bg_value', 'accent_color', 'text_color',
       'username_effect', 'cursor_effect', 'particles', 'font',
-      'splash_text', 'splash_enabled',
+      'splash_text', 'splash_enabled', 'bio_widget',
       'music_track', 'music_volume', 'music_autoplay',
       'social_links', 'custom_links', 'nsfw'
     ];
@@ -42,7 +43,7 @@ class Profile {
       if (!(key in fields)) continue;
       let v = fields[key];
       if (JSON_FIELDS.includes(key) && typeof v !== 'string') v = JSON.stringify(v);
-      if (['splash_enabled', 'music_autoplay', 'nsfw'].includes(key)) v = v ? 1 : 0;
+      if (['splash_enabled', 'music_autoplay', 'nsfw', 'bio_widget'].includes(key)) v = v ? 1 : 0;
       sets.push(`${key} = ?`);
       vals.push(v);
     }

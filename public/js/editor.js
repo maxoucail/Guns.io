@@ -1,26 +1,26 @@
 (() => {
   const profile = window.__INITIAL_PROFILE__ || {};
   const username = window.__USERNAME__;
+  const userAvatar = window.__USER_AVATAR__;
   const previewFrame = document.getElementById('preview-frame');
-  const saveState = document.getElementById('save-state');
+  const saveBar = document.getElementById('save-bar');
 
   const SOCIAL_OPTIONS = [
     'discord','twitter','instagram','tiktok','youtube','twitch','spotify',
     'soundcloud','github','telegram','snapchat','kick','roblox','steam','email','website'
   ];
 
-  let saveTimer;
-  const queueSave = (patch) => {
-    Object.assign(pendingPatch, patch);
-    clearTimeout(saveTimer);
-    setSaveState('saving', 'Sauvegarde…');
-    saveTimer = setTimeout(flushSave, 450);
+  let dirtyPatch = {};
+  let isDirty = false;
+
+  const markDirty = (patch) => {
+    Object.assign(dirtyPatch, patch);
+    isDirty = true;
+    saveBar.classList.add('visible');
   };
 
-  const pendingPatch = {};
   const flushSave = async () => {
-    const body = { ...pendingPatch };
-    Object.keys(pendingPatch).forEach(k => delete pendingPatch[k]);
+    const body = { ...dirtyPatch };
     try {
       const r = await fetch('/api/profile', {
         method: 'POST',
@@ -28,17 +28,26 @@
         body: JSON.stringify(body)
       });
       if (!r.ok) throw new Error('save failed');
-      setSaveState('ok', 'Synchronisé');
+      dirtyPatch = {};
+      isDirty = false;
+      saveBar.classList.remove('visible');
       refreshPreview();
-    } catch (e) {
-      setSaveState('error', 'Erreur de sauvegarde');
+    } catch {
+      alert('Erreur de sauvegarde. Réessaie.');
     }
   };
 
-  const setSaveState = (cls, txt) => {
-    saveState.className = 'save-state ' + (cls === 'ok' ? '' : cls);
-    saveState.textContent = txt;
-  };
+  document.getElementById('save-confirm').addEventListener('click', flushSave);
+  document.getElementById('save-abort').addEventListener('click', () => {
+    dirtyPatch = {};
+    isDirty = false;
+    saveBar.classList.remove('visible');
+    location.reload();
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+  });
 
   let refreshTimer;
   const refreshPreview = () => {
@@ -63,12 +72,13 @@
     el.addEventListener(ev, () => {
       let v = el.type === 'checkbox' ? el.checked : el.value;
       if (opts.toNumber) v = +v;
-      queueSave({ [key]: v });
+      markDirty({ [key]: v });
       if (opts.after) opts.after(v);
     });
   };
 
   bind('f-bio', 'bio');
+  bind('f-bio_widget', 'bio_widget');
   bind('f-splash_text', 'splash_text');
   bind('f-splash_enabled', 'splash_enabled');
   bind('f-music_autoplay', 'music_autoplay');
@@ -88,7 +98,7 @@
   const volVal = document.getElementById('vol-val');
   if (volEl) volEl.addEventListener('input', () => {
     volVal.textContent = volEl.value;
-    queueSave({ music_volume: +volEl.value });
+    markDirty({ music_volume: +volEl.value });
   });
 
   const bgSeg = document.querySelector('[data-seg="bg_type"]');
@@ -103,20 +113,37 @@
       setSegActive(t);
       let v = '';
       if (t === 'color') v = document.getElementById('bg-color').value;
-      else if (t === 'gradient') v = profile.bg_type === 'gradient' ? profile.bg_value : 'linear-gradient(135deg,#7c5cff,#00d4ff)';
+      else if (t === 'gradient') v = buildGradient();
       else if (t === 'image') v = document.getElementById('bg-image-url').value;
-      queueSave({ bg_type: t, bg_value: v });
+      markDirty({ bg_type: t, bg_value: v });
     });
   });
 
   const colorInput = document.getElementById('bg-color');
-  if (colorInput) colorInput.addEventListener('input', () => queueSave({ bg_type: 'color', bg_value: colorInput.value }));
+  if (colorInput) colorInput.addEventListener('input', () => markDirty({ bg_type: 'color', bg_value: colorInput.value }));
+
+  const gradC1 = document.getElementById('grad-c1');
+  const gradC2 = document.getElementById('grad-c2');
+  const gradDir = document.getElementById('grad-dir');
+  const buildGradient = () => {
+    const c1 = gradC1?.value || '#7c5cff';
+    const c2 = gradC2?.value || '#00d4ff';
+    const d = gradDir?.value || '135deg';
+    return `linear-gradient(${d},${c1},${c2})`;
+  };
+  const onGradChange = () => {
+    document.querySelectorAll('#grad-presets button').forEach(x => x.classList.remove('active'));
+    markDirty({ bg_type: 'gradient', bg_value: buildGradient() });
+  };
+  if (gradC1) gradC1.addEventListener('input', onGradChange);
+  if (gradC2) gradC2.addEventListener('input', onGradChange);
+  if (gradDir) gradDir.addEventListener('change', onGradChange);
 
   document.querySelectorAll('#grad-presets button').forEach(b => {
     if (profile.bg_value === b.dataset.val) b.classList.add('active');
     b.addEventListener('click', () => {
       document.querySelectorAll('#grad-presets button').forEach(x => x.classList.toggle('active', x === b));
-      queueSave({ bg_type: 'gradient', bg_value: b.dataset.val });
+      markDirty({ bg_type: 'gradient', bg_value: b.dataset.val });
     });
   });
 
@@ -125,7 +152,7 @@
     let bgTimer;
     bgImageUrl.addEventListener('input', () => {
       clearTimeout(bgTimer);
-      bgTimer = setTimeout(() => queueSave({ bg_type: 'image', bg_value: bgImageUrl.value }), 400);
+      bgTimer = setTimeout(() => markDirty({ bg_type: 'image', bg_value: bgImageUrl.value }), 400);
     });
   }
 
@@ -134,11 +161,8 @@
       const file = inp.files?.[0];
       if (!file) return;
       const kind = inp.dataset.upload;
-      if (kind === 'bg') {
-        uploadWithProgress(file, kind);
-      } else {
-        uploadSimple(file, kind);
-      }
+      if (kind === 'bg') uploadWithProgress(file, kind);
+      else uploadSimple(file, kind);
       inp.value = '';
     });
   });
@@ -147,17 +171,15 @@
     const fd = new FormData();
     fd.append('file', file);
     fd.append('kind', kind);
-    setSaveState('saving', 'Upload…');
     try {
       const r = await fetch('/api/upload', { method: 'POST', body: fd });
       const j = await r.json();
       if (!j.ok) throw new Error(j.error || 'upload failed');
       const thumb = document.getElementById('thumb-' + kind);
       if (thumb) thumb.style.backgroundImage = `url('${j.url}?t=${Date.now()}')`;
-      setSaveState('ok', 'Synchronisé');
       refreshPreview();
     } catch (e) {
-      setSaveState('error', "Échec de l'upload");
+      alert("Échec de l'upload : " + (e.message || 'erreur'));
     }
   }
 
@@ -166,54 +188,71 @@
     const fill = document.getElementById('bg-progress-fill');
     const pct  = document.getElementById('bg-progress-pct');
     const txt  = document.getElementById('bg-upload-txt');
-
-    const MB = (file.size / 1048576).toFixed(1);
-    txt.textContent = `${file.name} (${MB} Mo) — upload en cours…`;
+    txt.textContent = `${file.name} — upload…`;
     progressBox.style.display = 'flex';
-    fill.style.width = '0%';
-    pct.textContent = '0%';
-    setSaveState('saving', 'Upload en cours…');
-
+    fill.style.width = '0%'; pct.textContent = '0%';
     const fd = new FormData();
-    fd.append('file', file);
-    fd.append('kind', kind);
-
+    fd.append('file', file); fd.append('kind', kind);
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/upload');
-
     xhr.upload.addEventListener('progress', (e) => {
       if (!e.lengthComputable) return;
       const p = Math.round(e.loaded / e.total * 100);
       fill.style.width = p + '%';
-      pct.textContent = p + '%';
-      if (p === 100) {
-        setSaveState('saving', 'Push GitHub…');
-        pct.textContent = 'Traitement…';
-      }
+      pct.textContent = p === 100 ? 'Traitement…' : p + '%';
     });
-
     xhr.addEventListener('load', () => {
       progressBox.style.display = 'none';
       txt.textContent = 'Uploader image / gif / vidéo (max 98 Mo)';
       try {
         const j = JSON.parse(xhr.responseText);
         if (!j.ok) throw new Error(j.error || 'upload failed');
-        const bgUrlInput = document.getElementById('bg-image-url');
-        if (bgUrlInput) bgUrlInput.value = j.url;
-        setSaveState('ok', 'Synchronisé');
+        if (bgImageUrl) bgImageUrl.value = j.url;
+        markDirty({ bg_type: 'image', bg_value: j.url });
         refreshPreview();
       } catch (e) {
-        setSaveState('error', 'Échec upload : ' + (e.message || 'erreur serveur'));
+        alert('Échec upload : ' + (e.message || 'erreur serveur'));
       }
     });
-
     xhr.addEventListener('error', () => {
       progressBox.style.display = 'none';
       txt.textContent = 'Uploader image / gif / vidéo (max 98 Mo)';
-      setSaveState('error', 'Erreur réseau');
+      alert('Erreur réseau');
     });
-
     xhr.send(fd);
+  }
+
+  const avatarFromProviderBtn = document.getElementById('avatar-from-provider');
+  if (avatarFromProviderBtn && userAvatar) {
+    avatarFromProviderBtn.addEventListener('click', () => {
+      const thumb = document.getElementById('thumb-avatar');
+      if (thumb) thumb.style.backgroundImage = `url('${userAvatar}')`;
+      markDirty({ avatar: userAvatar });
+    });
+  }
+  const avatarClear = document.getElementById('avatar-clear');
+  if (avatarClear) {
+    avatarClear.addEventListener('click', () => {
+      const thumb = document.getElementById('thumb-avatar');
+      if (thumb) thumb.style.backgroundImage = '';
+      markDirty({ avatar: null });
+    });
+  }
+  const bannerFromProviderBtn = document.getElementById('banner-from-provider');
+  if (bannerFromProviderBtn && userAvatar) {
+    bannerFromProviderBtn.addEventListener('click', () => {
+      const thumb = document.getElementById('thumb-banner');
+      if (thumb) thumb.style.backgroundImage = `url('${userAvatar}')`;
+      markDirty({ banner: userAvatar });
+    });
+  }
+  const bannerClear = document.getElementById('banner-clear');
+  if (bannerClear) {
+    bannerClear.addEventListener('click', () => {
+      const thumb = document.getElementById('thumb-banner');
+      if (thumb) thumb.style.backgroundImage = '';
+      markDirty({ banner: null });
+    });
   }
 
   const musicQ = document.getElementById('music-q');
@@ -225,9 +264,11 @@
     musicTimer = setTimeout(async () => {
       const q = musicQ.value.trim();
       if (!q) { musicResults.innerHTML = ''; return; }
-      const r = await fetch('/api/music?q=' + encodeURIComponent(q));
-      const j = await r.json();
-      renderMusicResults(j.results || []);
+      try {
+        const r = await fetch('/api/music?q=' + encodeURIComponent(q));
+        const j = await r.json();
+        renderMusicResults(j.results || []);
+      } catch {}
     }, 300);
   });
 
@@ -235,10 +276,13 @@
     musicResults.innerHTML = '';
     items.forEach(t => {
       const li = document.createElement('li');
+      const badge = t.source === 'soundcloud'
+        ? '<span style="font-size:0.65rem;background:#f50;color:#fff;padding:1px 5px;border-radius:4px;margin-left:4px">SC</span>'
+        : '';
       li.innerHTML = `
         <img src="${t.cover || ''}" alt="" />
         <div class="info">
-          <strong>${escapeHtml(t.title)}</strong>
+          <strong>${escapeHtml(t.title)}${badge}</strong>
           <span>${escapeHtml(t.artist)}</span>
         </div>
         <button class="play" title="Aperçu">▶</button>
@@ -249,7 +293,7 @@
         if (audioPreview) { audioPreview.pause(); audioPreview = null; }
         audioPreview = new Audio(t.preview);
         audioPreview.volume = 0.6;
-        audioPreview.play();
+        audioPreview.play().catch(() => {});
       });
       li.addEventListener('click', () => selectTrack(t));
       musicResults.appendChild(li);
@@ -258,7 +302,7 @@
 
   function selectTrack(t) {
     if (audioPreview) audioPreview.pause();
-    queueSave({ music_track: { id: t.id, title: t.title, artist: t.artist, cover: t.cover, preview: t.preview } });
+    markDirty({ music_track: { id: t.id, title: t.title, artist: t.artist, cover: t.cover, preview: t.preview } });
     renderMusicCurrent(t);
     musicResults.innerHTML = '';
     musicQ.value = '';
@@ -276,13 +320,13 @@
       <button class="icon-btn" id="music-remove" title="Retirer">×</button>
     `;
     box.querySelector('#music-remove').addEventListener('click', () => {
-      queueSave({ music_track: null });
+      markDirty({ music_track: null });
       renderMusicCurrent(null);
     });
   }
   const removeBtn = document.getElementById('music-remove');
   if (removeBtn) removeBtn.addEventListener('click', () => {
-    queueSave({ music_track: null });
+    markDirty({ music_track: null });
     renderMusicCurrent(null);
   });
 
@@ -313,7 +357,7 @@
       el.addEventListener('click', () => { socials.splice(+el.dataset.i, 1); renderSocials(); pushSocials(); })
     );
   }
-  function pushSocials() { queueSave({ social_links: socials }); }
+  function pushSocials() { markDirty({ social_links: socials }); }
 
   document.getElementById('add-social').addEventListener('click', () => {
     socials.push({ platform: 'twitter', value: '' });
@@ -345,7 +389,7 @@
       el.addEventListener('click', () => { customs.splice(+el.dataset.i, 1); renderCustoms(); pushCustoms(); })
     );
   }
-  function pushCustoms() { queueSave({ custom_links: customs }); }
+  function pushCustoms() { markDirty({ custom_links: customs }); }
 
   document.getElementById('add-custom').addEventListener('click', () => {
     customs.push({ label: '', url: '' });

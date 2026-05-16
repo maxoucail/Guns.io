@@ -14,8 +14,6 @@
         background: <%= profile.bg_value || '#0b0a14' %>;
       <% } else if (profile.bg_type === 'gradient') { %>
         background: <%= profile.bg_value || 'linear-gradient(135deg,#0b0a14,#1a1a2e)' %>;
-      <% } else if (profile.bg_type === 'image' && profile.bg_value) { %>
-        background: #000;
       <% } %>
     }
   </style>
@@ -59,7 +57,14 @@
     <h1 class="name fx-username-<%= profile.username_effect %>" data-text="@<%= user.username %>">@<%= user.username %></h1>
 
     <% if (profile.bio) { %>
-      <p class="bio"><%= profile.bio %></p>
+      <% if (profile.bio_widget) { %>
+        <div class="bio-widget">
+          <div class="bio-widget-title">À propos</div>
+          <p class="bio"><%= profile.bio %></p>
+        </div>
+      <% } else { %>
+        <p class="bio"><%= profile.bio %></p>
+      <% } %>
     <% } %>
 
     <% var socials = profile.social_links || []; %>
