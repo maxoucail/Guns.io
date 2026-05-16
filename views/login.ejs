@@ -15,7 +15,9 @@
     <h1 class="auth-title">Connecte-toi</h1>
     <p class="auth-sub">Garde un seul compte. Choisis ton fournisseur.</p>
 
-    <% if (error) { %>
+    <% if (error === 'blocked') { %>
+      <div class="alert" style="border-color:rgba(255,108,171,0.4);color:#fda4b1">Ton compte a été suspendu. Contacte le support.</div>
+    <% } else if (error) { %>
       <div class="alert">Connexion impossible. Réessaie ou choisis un autre provider.</div>
     <% } %>
 

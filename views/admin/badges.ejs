@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .badge-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 14px; margin-bottom: 2rem; }
+    .badge-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+    .badge-icon { font-size: 1.8rem; }
+    .badge-info { flex: 1; min-width: 0; }
+    .badge-info strong { display: block; font-size: 0.92rem; }
+    .badge-info span { font-size: 0.78rem; color: var(--fg-2); }
+    .create-form { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; max-width: 500px; }
+    .create-form h3 { font-size: 0.82rem; text-transform: uppercase; color: var(--fg-2); margin: 0 0 14px; }
+    .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .form-row input, .form-row select { flex: 1; }
+  </style>
+</head>
+<body class="page-dashboard">
+  <div class="aurora dim" aria-hidden="true"><span></span><span></span><span></span></div>
+  <%- include('../partials/nav') %>
+  <main class="dash">
+    <header class="dash-head">
+      <h1 class="display small">Badges</h1>
+      <a class="btn ghost" href="/admin">← Admin</a>
+    </header>
+    <div class="badge-grid">
+      <% badges.forEach(function(b) { %>
+      <div class="badge-card" style="border-color:<%= b.color %>30">
+        <div class="badge-icon"><%= b.icon %></div>
+        <div class="badge-info">
+          <strong style="color:<%= b.color %>"><%= b.name %></strong>
+          <span><%= b.description || 'Aucune description' %></span>
+        </div>
+        <button class="btn ghost small" style="color:#fda4b1" onclick="deleteBadge('<%= b.id %>')">×</button>
+      </div>
+      <% }); %>
+    </div>
+    <div class="create-form">
+      <h3>Créer un badge</h3>
+      <div class="form-row">
+        <input type="text" id="b-name" placeholder="Nom" maxlength="40" />
+        <input type="text" id="b-icon" placeholder="Emoji/icône" maxlength="8" value="⭐" style="max-width:80px" />
+        <input type="color" id="b-color" value="#7c5cff" style="max-width:50px;padding:2px" />
+      </div>
+      <div class="form-row">
+        <input type="text" id="b-desc" placeholder="Description (optionnelle)" maxlength="200" />
+      </div>
+      <button class="btn" onclick="createBadge()">Créer</button>
+    </div>
+  </main>
+  <script>
+    async function createBadge() {
+      const name = document.getElementById('b-name').value.trim();
+      if (!name) return alert('Nom requis');
+      const r = await fetch('/admin/badges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, icon: document.getElementById('b-icon').value, color: document.getElementById('b-color').value, description: document.getElementById('b-desc').value })
+      }).then(r => r.json());
+      if (r.ok) location.reload();
+    }
+    async function deleteBadge(id) {
+      if (!confirm('Supprimer ce badge ?')) return;
+      const r = await fetch(`/admin/badges/${id}`, { method: 'DELETE' }).then(r => r.json());
+      if (r.ok) location.reload();
+    }
+  </script>
+</body>
+</html>

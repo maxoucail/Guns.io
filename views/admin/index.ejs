@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 16px; margin-bottom: 2rem; }
+    .stat-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; text-align: center; }
+    .stat-card .n { font-size: 2.4rem; font-weight: 800; color: var(--accent); }
+    .stat-card .l { font-size: 0.82rem; color: var(--fg-2); margin-top: 4px; }
+    .admin-nav { display: flex; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; }
+    .impersonate-bar { background: rgba(255,108,171,0.15); border: 1px solid rgba(255,108,171,0.3); padding: 10px 20px; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.88rem; display: flex; align-items: center; gap: 12px; }
+  </style>
+</head>
+<body class="page-dashboard">
+  <div class="aurora dim" aria-hidden="true"><span></span><span></span><span></span></div>
+  <%- include('../partials/nav') %>
+  <main class="dash">
+    <% if (req.session && req.session.impersonating) { %>
+    <div class="impersonate-bar">
+      ⚠️ Tu usurpes un compte. <a href="/admin/stop-impersonate" class="btn ghost small">Revenir à ton compte admin</a>
+    </div>
+    <% } %>
+    <header class="dash-head">
+      <h1 class="display small">Panneau <span class="gradient-text">Admin</span></h1>
+    </header>
+    <nav class="admin-nav">
+      <a class="btn" href="/admin/users">Utilisateurs</a>
+      <a class="btn ghost" href="/admin/badges">Badges</a>
+      <a class="btn ghost" href="/dashboard">Mon dashboard</a>
+    </nav>
+    <div class="admin-grid">
+      <div class="stat-card"><div class="n"><%= stats.users %></div><div class="l">Utilisateurs</div></div>
+      <div class="stat-card"><div class="n"><%= stats.admins %></div><div class="l">Admins</div></div>
+      <div class="stat-card"><div class="n"><%= stats.blocked %></div><div class="l">Bloqués</div></div>
+      <div class="stat-card"><div class="n"><%= stats.views.toLocaleString('fr-FR') %></div><div class="l">Vues totales</div></div>
+    </div>
+  </main>
+</body>
+</html>

@@ -33,6 +33,7 @@ class AuthController {
       failureRedirect: '/login?error=google_failed'
     }, (err, user) => {
       if (err || !user) return res.redirect('/login?error=google_failed');
+      if (user.blocked) return res.redirect('/login?error=blocked');
       req.session.regenerate((rErr) => {
         if (rErr) return next(rErr);
         req.logIn(user, (lErr) => {
@@ -52,6 +53,7 @@ class AuthController {
       failureRedirect: '/login?error=discord_failed'
     }, (err, user) => {
       if (err || !user) return res.redirect('/login?error=discord_failed');
+      if (user.blocked) return res.redirect('/login?error=blocked');
       req.session.regenerate((rErr) => {
         if (rErr) return next(rErr);
         req.logIn(user, (lErr) => {

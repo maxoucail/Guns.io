@@ -12,4 +12,12 @@ function ensureUsername(req, res, next) {
   return next();
 }
 
-module.exports = { ensureAuth, ensureUsername };
+function ensureAdmin(req, res, next) {
+  if (!req.user || !req.user.is_admin) {
+    if (req.accepts('html')) return res.status(403).redirect('/dashboard');
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  return next();
+}
+
+module.exports = { ensureAuth, ensureUsername, ensureAdmin };
