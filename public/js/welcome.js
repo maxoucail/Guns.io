@@ -22,7 +22,7 @@
           invalid: 'Invalide'
         })[j.reason] || 'Indisponible';
       }
-    } catch { /* silence */ }
+    } catch { }
   };
 
   input.addEventListener('input', (e) => {
