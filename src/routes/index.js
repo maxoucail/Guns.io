@@ -24,11 +24,8 @@ function build() {
   const router = express.Router();
 
   router.get('/', (req, res) => {
-    if (req.user && req.user.username) return res.redirect('/dashboard');
-    res.render('index', {
-      title: 'link2me · Ta page perso, sublime, gratuite',
-      user: req.user || null
-    });
+    if (req.user) return res.redirect(req.user.username ? '/dashboard' : '/welcome');
+    res.render('index', { title: 'link2me · Ta page perso, sublime, gratuite', user: null });
   });
 
   router.get('/login',  authLimit, AuthController.loginPage);

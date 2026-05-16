@@ -7,11 +7,11 @@ const helmet = require('helmet');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
 const passport = require('passport');
 
 const Config = require('./config/Config');
 const Db = require('./config/Database');
+const SessionStore = require('./config/SessionStore');
 const PassportConfig = require('./config/Passport');
 const Logger = require('./utils/Logger');
 const routes = require('./routes');
@@ -89,11 +89,7 @@ class Server {
 
   _configureSession() {
     this.app.use(session({
-      store: new SQLiteStore({
-        db: 'sessions.db',
-        dir: this.config.paths.data,
-        concurrentDB: true
-      }),
+      store: new SessionStore(),
       secret: this.config.sessionSecret,
       resave: false,
       saveUninitialized: false,
