@@ -63,8 +63,14 @@ class ApiController {
     if ('music_volume' in data) updates.music_volume = Validator.clamp(data.music_volume, 0, 100);
 
     if ('bg_type' in data && VALID_BG_TYPES.has(data.bg_type)) updates.bg_type = data.bg_type;
-    if ('bg_value' in data && typeof data.bg_value === 'string' && data.bg_value.length < 4096) {
-      updates.bg_value = data.bg_value;
+    if ('bg_value' in data && typeof data.bg_value === 'string') {
+      const bgType = updates.bg_type ?? data.bg_type;
+      if (bgType === 'image') {
+        const safe = Validator.safeUrl(data.bg_value);
+        if (safe) updates.bg_value = safe;
+      } else if (data.bg_value.length < 4096) {
+        updates.bg_value = data.bg_value;
+      }
     }
 
     if ('username_effect' in data && VALID_USERNAME_FX.has(data.username_effect)) updates.username_effect = data.username_effect;

@@ -117,6 +117,8 @@ class Server {
     this.app.use((req, res, next) => {
       res.locals.SocialLinks = SocialLinks;
       res.locals.user = req.user || null;
+      res.locals.safeJSON = (v) =>
+        JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
       next();
     });
     this.app.use(routes.build());

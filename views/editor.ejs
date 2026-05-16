@@ -201,8 +201,8 @@
   </main>
 
   <script>
-    window.__INITIAL_PROFILE__ = <%- JSON.stringify(profile) %>;
-    window.__USERNAME__ = <%- JSON.stringify(user.username) %>;
+    window.__INITIAL_PROFILE__ = <%- safeJSON(profile) %>;
+    window.__USERNAME__ = <%- safeJSON(user.username) %>;
   </script>
   <script src="/static/js/editor.js" defer></script>
 </body>

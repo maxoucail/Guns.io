@@ -112,9 +112,9 @@
 
   <script>
     window.__PROFILE__ = {
-      particles: <%- JSON.stringify(profile.particles) %>,
-      cursor: <%- JSON.stringify(profile.cursor_effect) %>,
-      accent: <%- JSON.stringify(profile.accent_color) %>,
+      particles: <%- safeJSON(profile.particles) %>,
+      cursor: <%- safeJSON(profile.cursor_effect) %>,
+      accent: <%- safeJSON(profile.accent_color) %>,
       splash: <%= profile.splash_enabled ? 'true' : 'false' %>,
       autoplay: <%= profile.music_autoplay ? 'true' : 'false' %>,
       volume: <%= profile.music_volume %>
