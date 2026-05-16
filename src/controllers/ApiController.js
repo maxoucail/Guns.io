@@ -1,13 +1,13 @@
 'use strict';
 
-const crypto = require('crypto');
-const sharp = require('sharp');
-const Profile = require('../models/Profile');
-const User = require('../models/User');
-const Validator = require('../utils/Validator');
-const Deezer = require('../services/DeezerService');
-const GhStorage = require('../services/GitHubStorageService');
-const Logger = require('../utils/Logger');
+const crypto  = require('crypto');
+const sharp   = require('sharp');
+const Profile    = require('../models/Profile');
+const User       = require('../models/User');
+const Validator  = require('../utils/Validator');
+const Deezer     = require('../services/DeezerService');
+const GhStorage  = require('../services/GitHubStorageService');
+const Logger     = require('../utils/Logger');
 
 const MAX_MEDIA = 98 * 1024 * 1024;   // 98 Mo — fichiers lourds (bg vidéo/gif)
 const MAX_IMAGE = 8  * 1024 * 1024;   // 8 Mo  — avatar / bannière (avant redimensionnement)
@@ -170,28 +170,18 @@ class ApiController {
     const filename = `${kind}-${hash}${ext}`;
     const ghPath  = `uploads/${req.user.id}/${filename}`;
 
-    // ---- Stockage GitHub ----
-    if (GhStorage.isConfigured()) {
-      try {
-        const url = await GhStorage.upload(buffer, ghPath);
-        await ApiController._saveToProfile(req.user.id, kind, url);
-        return res.json({ ok: true, url });
-      } catch (err) {
-        Logger.error('GitHubStorage.upload échoué', err.message || err);
-        return res.status(500).json({ error: 'github_upload_failed', detail: err.message });
-      }
+    // ---- Stockage GitHub (obligatoire) ----
+    if (!GhStorage.isConfigured()) {
+      return res.status(503).json({ error: 'github_not_configured' });
     }
-
-    // ---- Fallback local (dev / GitHub non configuré) ----
-    const fs = require('fs');
-    const path = require('path');
-    const Config = require('../config/Config');
-    const dir = path.join(Config.paths.uploads, req.user.id);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, filename), buffer);
-    const relUrl = `/uploads/${req.user.id}/${filename}`;
-    await ApiController._saveToProfile(req.user.id, kind, relUrl);
-    return res.json({ ok: true, url: relUrl });
+    try {
+      const url = await GhStorage.upload(buffer, ghPath);
+      ApiController._saveToProfile(req.user.id, kind, url);
+      return res.json({ ok: true, url });
+    } catch (err) {
+      Logger.error('GitHubStorage.upload échoué', err.message || err);
+      return res.status(500).json({ error: 'github_upload_failed', detail: err.message });
+    }
   }
 
   static _saveToProfile(userId, kind, url) {
