@@ -10,9 +10,11 @@ const ApiController     = require('../controllers/ApiController');
 const { ensureAuth, ensureUsername } = require('../middleware/auth');
 const Config = require('../config/Config');
 
+const MAX_UPLOAD = 98 * 1024 * 1024; // 98 Mo (limite GitHub)
+
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: Math.max(Config.uploads.maxAvatar, Config.uploads.maxBanner) }
+  limits: { fileSize: MAX_UPLOAD }
 });
 
 const writeLimit = rateLimit({ windowMs: 60 * 1000, max: 60, standardHeaders: true, legacyHeaders: false });

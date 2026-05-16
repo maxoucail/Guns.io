@@ -137,27 +137,95 @@
 
   // ---------- Uploads ----------
   document.querySelectorAll('[data-upload]').forEach(inp => {
-    inp.addEventListener('change', async () => {
+    inp.addEventListener('change', () => {
       const file = inp.files?.[0];
       if (!file) return;
       const kind = inp.dataset.upload;
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('kind', kind);
-      setSaveState('saving', 'Upload…');
+
+      if (kind === 'bg') {
+        // Upload lourd avec barre de progression (XHR)
+        uploadWithProgress(file, kind);
+      } else {
+        // Avatar / bannière — fetch simple
+        uploadSimple(file, kind, inp);
+      }
+      inp.value = '';
+    });
+  });
+
+  async function uploadSimple(file, kind, inp) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('kind', kind);
+    setSaveState('saving', 'Upload…');
+    try {
+      const r = await fetch('/api/upload', { method: 'POST', body: fd });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'upload failed');
+      const thumb = document.getElementById('thumb-' + kind);
+      if (thumb) thumb.style.backgroundImage = `url('${j.url}?t=${Date.now()}')`;
+      setSaveState('ok', 'Synchronisé');
+      refreshPreview();
+    } catch (e) {
+      setSaveState('error', "Échec de l'upload");
+    }
+  }
+
+  function uploadWithProgress(file, kind) {
+    const progressBox = document.getElementById('bg-upload-progress');
+    const fill = document.getElementById('bg-progress-fill');
+    const pct  = document.getElementById('bg-progress-pct');
+    const txt  = document.getElementById('bg-upload-txt');
+
+    const MB = (file.size / 1048576).toFixed(1);
+    txt.textContent = `${file.name} (${MB} Mo) — upload en cours…`;
+    progressBox.style.display = 'flex';
+    fill.style.width = '0%';
+    pct.textContent = '0%';
+    setSaveState('saving', 'Upload en cours…');
+
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('kind', kind);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload');
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (!e.lengthComputable) return;
+      const p = Math.round(e.loaded / e.total * 100);
+      fill.style.width = p + '%';
+      pct.textContent = p + '%';
+      // Au-delà de 100% upload = traitement serveur (push GitHub en cours)
+      if (p === 100) {
+        setSaveState('saving', 'Push GitHub…');
+        pct.textContent = 'Traitement…';
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      progressBox.style.display = 'none';
+      txt.textContent = 'Uploader image / gif / vidéo (max 98 Mo)';
       try {
-        const r = await fetch('/api/upload', { method: 'POST', body: fd });
-        const j = await r.json();
+        const j = JSON.parse(xhr.responseText);
         if (!j.ok) throw new Error(j.error || 'upload failed');
-        const thumb = document.getElementById('thumb-' + kind);
-        if (thumb) thumb.style.backgroundImage = `url('${j.url}?t=${Date.now()}')`;
+        const bgUrlInput = document.getElementById('bg-image-url');
+        if (bgUrlInput) bgUrlInput.value = j.url;
         setSaveState('ok', 'Synchronisé');
         refreshPreview();
       } catch (e) {
-        setSaveState('error', "Échec de l'upload");
-      } finally { inp.value = ''; }
+        setSaveState('error', 'Échec upload : ' + (e.message || 'erreur serveur'));
+      }
     });
-  });
+
+    xhr.addEventListener('error', () => {
+      progressBox.style.display = 'none';
+      txt.textContent = 'Uploader image / gif / vidéo (max 98 Mo)';
+      setSaveState('error', 'Erreur réseau');
+    });
+
+    xhr.send(fd);
+  }
 
   // ---------- Music search ----------
   const musicQ = document.getElementById('music-q');

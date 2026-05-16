@@ -89,7 +89,17 @@
           </div>
           <div data-bg="image">
             <input type="text" id="bg-image-url" placeholder="https://... (lien direct image/vidéo .mp4)" value="<%= profile.bg_type === 'image' ? profile.bg_value : '' %>" />
-            <small class="hint">Astuce : tu peux mettre une URL .mp4, .webm ou .gif.</small>
+            <small class="hint">Astuce : tu peux coller une URL ou uploader un fichier ci-dessous.</small>
+            <div class="bg-upload-row">
+              <label class="btn ghost small" id="bg-upload-label">
+                <span id="bg-upload-txt">Uploader image / gif / vidéo (max 98 Mo)</span>
+                <input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" data-upload="bg" hidden />
+              </label>
+              <div class="upload-progress" id="bg-upload-progress" style="display:none">
+                <div class="progress-bar"><div class="progress-fill" id="bg-progress-fill"></div></div>
+                <span id="bg-progress-pct">0%</span>
+              </div>
+            </div>
           </div>
         </div>
 
