@@ -99,20 +99,39 @@
   </main>
 
   <% if (profile.music_track && profile.music_track.preview) { %>
-    <div class="player" id="player" data-volume="<%= profile.music_volume %>" data-autoplay="<%= profile.music_autoplay ? '1' : '0' %>">
-      <img class="player-cover" src="<%= profile.music_track.cover || '' %>" alt="" />
-      <div class="player-info">
-        <strong><%= profile.music_track.title %></strong>
-        <span><%= profile.music_track.artist %></span>
+    <% const ytMatch = (profile.music_track.preview || '').match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/); %>
+    <% const ytId = ytMatch ? ytMatch[1] : null; %>
+    <% if (ytId) { %>
+      <div class="player player-yt" id="player">
+        <iframe
+          id="yt-iframe"
+          src=""
+          data-src="https://www.youtube-nocookie.com/embed/<%= ytId %>?controls=1&rel=0<% if (profile.music_autoplay) { %>&autoplay=1<% } %>"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+          loading="lazy"
+          style="border:0;display:block"></iframe>
+        <div class="player-info" style="padding:8px 12px">
+          <strong><%= profile.music_track.title %></strong>
+          <span><%= profile.music_track.artist %></span>
+        </div>
       </div>
-      <button class="player-btn" id="player-toggle" aria-label="Lecture/pause">
-        <svg id="ic-play" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
-        <svg id="ic-pause" viewBox="0 0 24 24" width="18" height="18" style="display:none"><path fill="currentColor" d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-      </button>
-      <audio id="audio" preload="none">
-        <source src="<%= profile.music_track.preview %>" type="audio/mpeg" />
-      </audio>
-    </div>
+    <% } else { %>
+      <div class="player" id="player">
+        <img class="player-cover" src="<%= profile.music_track.cover || '' %>" alt="" />
+        <div class="player-info">
+          <strong><%= profile.music_track.title %></strong>
+          <span><%= profile.music_track.artist %></span>
+        </div>
+        <button class="player-btn" id="player-toggle" aria-label="Lecture/pause">
+          <svg id="ic-play" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+          <svg id="ic-pause" viewBox="0 0 24 24" width="18" height="18" style="display:none"><path fill="currentColor" d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </button>
+        <audio id="audio" preload="none">
+          <source src="<%= profile.music_track.preview %>" type="audio/mpeg" />
+        </audio>
+      </div>
+    <% } %>
   <% } %>
 
   <script>

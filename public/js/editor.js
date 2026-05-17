@@ -27,7 +27,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      if (!r.ok) throw new Error('save failed');
+      if (!r.ok || r.redirected) {
+        location.href = '/login';
+        return;
+      }
+      const j = await r.json();
+      if (!j.ok) throw new Error('server error');
       dirtyPatch = {};
       isDirty = false;
       saveBar.classList.remove('visible');
@@ -276,8 +281,8 @@
     musicResults.innerHTML = '';
     items.forEach(t => {
       const li = document.createElement('li');
-      const badge = t.source === 'soundcloud'
-        ? '<span style="font-size:0.65rem;background:#f50;color:#fff;padding:1px 5px;border-radius:4px;margin-left:4px">SC</span>'
+      const badge = t.source === 'youtube'
+        ? '<span style="font-size:0.65rem;background:#f00;color:#fff;padding:1px 5px;border-radius:4px;margin-left:4px">YT</span>'
         : '';
       li.innerHTML = `
         <img src="${t.cover || ''}" alt="" />
@@ -290,6 +295,10 @@
       const playBtn = li.querySelector('.play');
       playBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (t.source === 'youtube') {
+          window.open('https://www.youtube.com/watch?v=' + t.id.replace('yt_', ''), '_blank', 'noopener');
+          return;
+        }
         if (audioPreview) { audioPreview.pause(); audioPreview = null; }
         audioPreview = new Audio(t.preview);
         audioPreview.volume = 0.6;

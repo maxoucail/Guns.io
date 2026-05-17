@@ -6,7 +6,7 @@ const Profile    = require('../models/Profile');
 const User       = require('../models/User');
 const Validator  = require('../utils/Validator');
 const Deezer     = require('../services/DeezerService');
-const SoundCloud  = require('../services/SoundCloudService');
+const YouTube    = require('../services/YouTubeService');
 const GhStorage  = require('../services/GitHubStorageService');
 const Logger     = require('../utils/Logger');
 
@@ -44,8 +44,8 @@ class ApiController {
 
   static async musicSearch(req, res) {
     const q = (req.query.q || '').trim();
-    const [dz, sc] = await Promise.all([Deezer.search(q, 10), SoundCloud.search(q, 6)]);
-    res.json({ results: [...dz, ...sc] });
+    const [dz, yt] = await Promise.all([Deezer.search(q, 10), YouTube.search(q, 6)]);
+    res.json({ results: [...dz, ...yt] });
   }
 
   static updateProfile(req, res) {

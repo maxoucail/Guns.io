@@ -26,6 +26,7 @@ class Server {
   async start() {
     this._ensureDirs();
     this._configureApp();
+    this._configureCanonicalRedirect();
     this._configureSecurity();
     this._configureSession();
     this._configurePassport();
@@ -67,6 +68,20 @@ class Server {
     }));
   }
 
+  _configureCanonicalRedirect() {
+    if (!this.config.isProd()) return;
+    try {
+      const base = new URL(this.config.baseUrl);
+      const canonical = base.hostname;
+      this.app.use((req, res, next) => {
+        if (req.hostname && req.hostname !== canonical) {
+          return res.redirect(301, `${base.protocol}//${canonical}${req.url}`);
+        }
+        next();
+      });
+    } catch { }
+  }
+
   _configureSecurity() {
     this.app.use(helmet({
       contentSecurityPolicy: {
@@ -79,6 +94,7 @@ class Server {
           'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
           'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
           'connect-src': ["'self'"],
+          'frame-src': ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
           'frame-ancestors': ["'none'"]
         }
       },
@@ -88,6 +104,14 @@ class Server {
   }
 
   _configureSession() {
+    let cookieDomain;
+    try {
+      const base = new URL(this.config.baseUrl);
+      if (this.config.isProd() && base.hostname !== 'localhost') {
+        cookieDomain = '.' + base.hostname.replace(/^www\./, '');
+      }
+    } catch { }
+
     this.app.use(session({
       store: new SessionStore(),
       secret: this.config.sessionSecret,
@@ -98,7 +122,8 @@ class Server {
         httpOnly: true,
         secure: this.config.isProd(),
         sameSite: 'lax',
-        maxAge: 1000 * 60 * 60 * 24 * 30
+        maxAge: 1000 * 60 * 60 * 24 * 30,
+        domain: cookieDomain
       }
     }));
   }

@@ -294,3 +294,17 @@ body.fx-cursor-glow .cursor-fx {
 @media (max-width: 500px) {
   .player { left: 50%; transform: translateX(-50%); bottom: 12px; }
 }
+
+.player-yt {
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  max-width: 240px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+.player-yt iframe { width: 240px; height: 135px; }
+.player-yt .player-info { display: flex; flex-direction: column; }
+.player-yt .player-info strong,
+.player-yt .player-info span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 216px; }

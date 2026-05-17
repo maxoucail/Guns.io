@@ -1,8 +1,9 @@
 (() => {
   const P = window.__PROFILE__ || {};
   const splash = document.getElementById('splash');
-  const profile = document.getElementById('profile');
+  const profileEl = document.getElementById('profile');
   const audio = document.getElementById('audio');
+  const yt = document.getElementById('yt-iframe');
   const toggle = document.getElementById('player-toggle');
   const icPlay = document.getElementById('ic-play');
   const icPause = document.getElementById('ic-pause');
@@ -10,21 +11,30 @@
 
   const previewMode = new URLSearchParams(location.search).get('preview') === '1';
 
+  const activateYt = () => {
+    if (!yt || yt.src) return;
+    let src = yt.dataset.src || '';
+    if (previewMode) src = src.replace('&autoplay=1', '');
+    yt.src = src;
+  };
+
   const enter = () => {
     if (splash) {
       splash.classList.add('hide');
       setTimeout(() => splash.remove(), 700);
     }
-    if (profile) profile.removeAttribute('hidden');
+    if (profileEl) profileEl.removeAttribute('hidden');
     if (P.autoplay && audio) tryPlay();
+    activateYt();
   };
 
   if (splash && !previewMode) {
     splash.addEventListener('click', enter, { once: true });
     document.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') enter(); }, { once: true });
-  } else if (splash && previewMode) {
-    splash.remove();
-    if (profile) profile.removeAttribute('hidden');
+  } else {
+    if (splash) splash.remove();
+    if (profileEl) profileEl.removeAttribute('hidden');
+    activateYt();
   }
 
   if (audio) {
@@ -35,8 +45,8 @@
   const tryPlay = () => {
     if (!audio) return;
     audio.play().then(() => {
-      icPlay.style.display = 'none';
-      icPause.style.display = '';
+      if (icPlay) icPlay.style.display = 'none';
+      if (icPause) icPause.style.display = '';
       if (cover) cover.classList.add('spin');
     }).catch(() => {});
   };
@@ -46,8 +56,8 @@
       if (audio.paused) tryPlay();
       else {
         audio.pause();
-        icPause.style.display = 'none';
-        icPlay.style.display = '';
+        if (icPause) icPause.style.display = 'none';
+        if (icPlay) icPlay.style.display = '';
         if (cover) cover.classList.remove('spin');
       }
     });

@@ -45,7 +45,7 @@ class ProfileController {
       title: 'Éditeur · link2me',
       user: req.user,
       profile,
-      soundcloudEnabled: Config.soundcloudEnabled()
+      youtubeEnabled: Config.youtubeEnabled()
     });
   }
 
