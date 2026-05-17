@@ -56,6 +56,52 @@ class User {
       .run(username, Date.now(), this.id);
     this.username = username;
   }
+
+  static findAll({ page = 1, limit = 30, search = '' } = {}) {
+    const offset = (page - 1) * limit;
+    if (search) {
+      const q = '%' + search + '%';
+      return Db.prepare(`SELECT * FROM users WHERE username LIKE ? OR email LIKE ? OR display_name LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+        .all(q, q, q, limit, offset).map(r => new User(r));
+    }
+    return Db.prepare('SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?').all(limit, offset).map(r => new User(r));
+  }
+
+  static count(search = '') {
+    if (search) {
+      const q = '%' + search + '%';
+      return Db.prepare(`SELECT COUNT(*) as n FROM users WHERE username LIKE ? OR email LIKE ? OR display_name LIKE ?`).get(q, q, q).n;
+    }
+    return Db.prepare('SELECT COUNT(*) as n FROM users').get().n;
+  }
+
+  static setAdmin(id, isAdmin) {
+    Db.prepare('UPDATE users SET is_admin = ?, updated_at = ? WHERE id = ?').run(isAdmin ? 1 : 0, Date.now(), id);
+  }
+
+  static block(id, message = null) {
+    Db.prepare('UPDATE users SET blocked = 1, blocked_message = ?, updated_at = ? WHERE id = ?').run(message || null, Date.now(), id);
+  }
+
+  static unblock(id) {
+    Db.prepare('UPDATE users SET blocked = 0, blocked_message = NULL, updated_at = ? WHERE id = ?').run(Date.now(), id);
+  }
+
+  static delete(id) {
+    Db.prepare('DELETE FROM users WHERE id = ?').run(id);
+  }
+
+  static updateLastSeen(id, ip) {
+    Db.prepare('UPDATE users SET last_ip = ?, last_seen_at = ? WHERE id = ?').run(ip || null, Date.now(), id);
+  }
+
+  static getBadges(userId) {
+    return Db.prepare(`
+      SELECT b.*, ub.awarded_at, ub.awarded_by FROM badges b
+      JOIN user_badges ub ON b.id = ub.badge_id
+      WHERE ub.user_id = ? ORDER BY ub.awarded_at DESC
+    `).all(userId);
+  }
 }
 
 module.exports = User;

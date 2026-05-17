@@ -1,5 +1,3 @@
-/* link2me — profile.css */
-
 html, body { margin: 0; padding: 0; min-height: 100vh; }
 body.profile-body {
   font-family: var(--font, 'Inter', sans-serif);
@@ -7,29 +5,41 @@ body.profile-body {
   min-height: 100vh;
   display: flex; flex-direction: column;
   position: relative; overflow-x: hidden;
+  background: #0b0a14;
 }
 
 .bg-media {
   position: fixed; inset: 0; width: 100%; height: 100%;
   object-fit: cover;
-  z-index: -2;
+  z-index: 1;
 }
 .bg-overlay {
-  position: fixed; inset: 0; z-index: -1;
+  position: fixed; inset: 0; z-index: 2;
   background: rgba(0,0,0,0.45);
   backdrop-filter: blur(2px);
 }
 
 #particles-canvas {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  position: fixed; inset: 0; z-index: 3; pointer-events: none;
 }
 
 .cursor-fx {
   position: fixed; top: 0; left: 0;
   pointer-events: none; z-index: 9999;
+  border-radius: 50%;
+  will-change: transform;
+}
+body.fx-cursor-trail .cursor-fx {
+  width: 28px; height: 28px; margin: -14px;
+  background: var(--accent, #7c5cff);
+  filter: blur(14px); opacity: 0.75;
+}
+body.fx-cursor-glow .cursor-fx {
+  width: 64px; height: 64px; margin: -32px;
+  background: var(--accent, #7c5cff);
+  filter: blur(26px); opacity: 0.55;
 }
 
-/* === Splash === */
 .splash {
   position: fixed; inset: 0; z-index: 100;
   display: flex; align-items: center; justify-content: center;
@@ -79,7 +89,6 @@ body.profile-body {
 }
 @keyframes blink { 50% { opacity: 0.35; } }
 
-/* === Profile === */
 .profile {
   flex: 1;
   width: 100%;
@@ -88,7 +97,7 @@ body.profile-body {
   padding: 3rem 1.4rem 4rem;
   display: flex; flex-direction: column; align-items: center;
   text-align: center;
-  position: relative; z-index: 1;
+  position: relative; z-index: 5;
 }
 
 .banner {
@@ -140,8 +149,27 @@ body.profile-body {
   white-space: pre-wrap;
   max-width: 440px;
 }
+.bio-widget {
+  width: 100%;
+  max-width: 440px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin: 0 0 1.5rem;
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(8px);
+}
+.bio-widget .bio { margin: 0; }
+.bio-widget-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 8px;
+}
 
-/* Socials */
 .socials {
   list-style: none; padding: 0; margin: 0 0 1.8rem;
   display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
@@ -161,7 +189,6 @@ body.profile-body {
   box-shadow: 0 12px 30px -8px var(--accent);
 }
 
-/* Custom links — full-width buttons */
 .custom-links {
   list-style: none; padding: 0; margin: 0 0 2rem;
   display: flex; flex-direction: column; gap: 10px;
@@ -202,7 +229,6 @@ body.profile-body {
   font-weight: 700;
 }
 
-/* === Username effects === */
 .fx-username-glow {
   text-shadow: 0 0 30px var(--accent);
 }
@@ -240,23 +266,6 @@ body.profile-body {
   84% { clip-path: inset(50% 0 30% 0); transform: translate(3px,0); }
 }
 
-/* === Cursor === */
-body.fx-cursor-trail .cursor-fx::after,
-body.fx-cursor-glow  .cursor-fx::after {
-  content: '';
-  position: absolute;
-  left: var(--cx, -100px); top: var(--cy, -100px);
-  width: 30px; height: 30px;
-  margin: -15px;
-  border-radius: 50%;
-  background: var(--accent);
-  filter: blur(20px);
-  opacity: 0.6;
-  transition: left .04s linear, top .04s linear;
-}
-body.fx-cursor-glow .cursor-fx::after { filter: blur(28px); width: 60px; height: 60px; margin: -30px; opacity: 0.5; }
-
-/* === Player === */
 .player {
   position: fixed;
   bottom: 16px; left: 16px;
@@ -285,3 +294,17 @@ body.fx-cursor-glow .cursor-fx::after { filter: blur(28px); width: 60px; height:
 @media (max-width: 500px) {
   .player { left: 50%; transform: translateX(-50%); bottom: 12px; }
 }
+
+.player-yt {
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  max-width: 240px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+.player-yt iframe { width: 240px; height: 135px; }
+.player-yt .player-info { display: flex; flex-direction: column; }
+.player-yt .player-info strong,
+.player-yt .player-info span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 216px; }

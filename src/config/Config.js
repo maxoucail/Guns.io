@@ -41,6 +41,9 @@ class Config {
 
   googleEnabled() { return !!(this.oauth.google.clientId && this.oauth.google.clientSecret); }
   discordEnabled() { return !!(this.oauth.discord.clientId && this.oauth.discord.clientSecret); }
+  soundcloudEnabled() { return !!process.env.SOUNDCLOUD_CLIENT_ID; }
+  youtubeEnabled() { return true; }
+  adminPassword() { return process.env.ADMIN_PASSWORD || ''; }
 }
 
 module.exports = new Config();

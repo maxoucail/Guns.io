@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body class="page-dashboard">
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <main style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px;text-align:center;padding:2rem">
+    <div style="font-size:3rem">🚫</div>
+    <h1 class="display small" style="margin:0">Compte suspendu</h1>
+    <p style="color:var(--fg-2);max-width:400px">
+      <% if (user.blocked_message) { %>
+        <%= user.blocked_message %>
+      <% } else { %>
+        Ton compte a été suspendu par un administrateur.
+      <% } %>
+    </p>
+    <a class="btn ghost" href="/logout">Se déconnecter</a>
+  </main>
+</body>
+</html>

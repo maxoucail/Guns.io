@@ -33,9 +33,13 @@ class AuthController {
       failureRedirect: '/login?error=google_failed'
     }, (err, user) => {
       if (err || !user) return res.redirect('/login?error=google_failed');
-      req.logIn(user, (e) => {
-        if (e) return next(e);
-        res.redirect(user.username ? '/dashboard' : '/welcome');
+      if (user.blocked) return res.redirect('/login?error=blocked');
+      req.session.regenerate((rErr) => {
+        if (rErr) return next(rErr);
+        req.logIn(user, (lErr) => {
+          if (lErr) return next(lErr);
+          res.redirect(user.username ? '/dashboard' : '/welcome');
+        });
       });
     })(req, res, next);
   }
@@ -49,9 +53,13 @@ class AuthController {
       failureRedirect: '/login?error=discord_failed'
     }, (err, user) => {
       if (err || !user) return res.redirect('/login?error=discord_failed');
-      req.logIn(user, (e) => {
-        if (e) return next(e);
-        res.redirect(user.username ? '/dashboard' : '/welcome');
+      if (user.blocked) return res.redirect('/login?error=blocked');
+      req.session.regenerate((rErr) => {
+        if (rErr) return next(rErr);
+        req.logIn(user, (lErr) => {
+          if (lErr) return next(lErr);
+          res.redirect(user.username ? '/dashboard' : '/welcome');
+        });
       });
     })(req, res, next);
   }

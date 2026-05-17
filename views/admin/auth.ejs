@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .auth-shell { max-width: 400px; margin: 0 auto; padding: 6rem 1.5rem 3rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+    .auth-form { width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+    .auth-form input[type="password"] { width: 100%; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem 1rem; color: var(--fg); font-size: 1rem; outline: none; box-sizing: border-box; }
+    .auth-form input[type="password"]:focus { border-color: var(--accent); }
+    .alert { border: 1px solid rgba(255,108,171,0.4); background: rgba(255,108,171,0.08); border-radius: 10px; padding: 0.75rem 1rem; color: #fda4b1; font-size: 0.88rem; }
+  </style>
+</head>
+<body class="page-dashboard">
+  <div class="aurora dim" aria-hidden="true"><span></span><span></span><span></span></div>
+  <%- include('../partials/nav') %>
+  <main class="auth-shell">
+    <h1 class="display small" style="margin:0">Accès <span class="gradient-text">Admin</span></h1>
+    <% if (error === 'wrong') { %>
+      <div class="alert">Mot de passe incorrect.</div>
+    <% } else if (error === 'not_configured') { %>
+      <div class="alert">ADMIN_PASSWORD non configuré dans le .env.</div>
+    <% } %>
+    <form class="auth-form" method="POST" action="/admin/auth">
+      <input type="password" name="password" placeholder="Mot de passe admin" autofocus autocomplete="current-password" />
+      <button class="btn" type="submit" style="width:100%">Entrer</button>
+    </form>
+    <a href="/dashboard" class="back-link" style="font-size:0.85rem;color:var(--fg-2)">← Retour au dashboard</a>
+  </main>
+</body>
+</html>

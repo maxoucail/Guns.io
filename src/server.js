@@ -7,11 +7,11 @@ const helmet = require('helmet');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
 const passport = require('passport');
 
 const Config = require('./config/Config');
 const Db = require('./config/Database');
+const SessionStore = require('./config/SessionStore');
 const PassportConfig = require('./config/Passport');
 const Logger = require('./utils/Logger');
 const routes = require('./routes');
@@ -26,6 +26,7 @@ class Server {
   async start() {
     this._ensureDirs();
     this._configureApp();
+    this._configureCanonicalRedirect();
     this._configureSecurity();
     this._configureSession();
     this._configurePassport();
@@ -45,7 +46,6 @@ class Server {
     [this.config.paths.data, this.config.paths.uploads].forEach((p) => {
       if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
     });
-    // Touche la DB pour s'assurer qu'elle est initialisée dans ce worker
     Db.prepare('SELECT 1').get();
   }
 
@@ -68,6 +68,20 @@ class Server {
     }));
   }
 
+  _configureCanonicalRedirect() {
+    if (!this.config.isProd()) return;
+    try {
+      const base = new URL(this.config.baseUrl);
+      const canonical = base.hostname;
+      this.app.use((req, res, next) => {
+        if (req.hostname && req.hostname !== canonical) {
+          return res.redirect(301, `${base.protocol}//${canonical}${req.url}`);
+        }
+        next();
+      });
+    } catch { }
+  }
+
   _configureSecurity() {
     this.app.use(helmet({
       contentSecurityPolicy: {
@@ -80,6 +94,7 @@ class Server {
           'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
           'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
           'connect-src': ["'self'"],
+          'frame-src': ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
           'frame-ancestors': ["'none'"]
         }
       },
@@ -89,12 +104,16 @@ class Server {
   }
 
   _configureSession() {
+    let cookieDomain;
+    try {
+      const base = new URL(this.config.baseUrl);
+      if (this.config.isProd() && base.hostname !== 'localhost') {
+        cookieDomain = '.' + base.hostname.replace(/^www\./, '');
+      }
+    } catch { }
+
     this.app.use(session({
-      store: new SQLiteStore({
-        db: 'sessions.db',
-        dir: this.config.paths.data,
-        concurrentDB: true
-      }),
+      store: new SessionStore(),
       secret: this.config.sessionSecret,
       resave: false,
       saveUninitialized: false,
@@ -103,7 +122,8 @@ class Server {
         httpOnly: true,
         secure: this.config.isProd(),
         sameSite: 'lax',
-        maxAge: 1000 * 60 * 60 * 24 * 30
+        maxAge: 1000 * 60 * 60 * 24 * 30,
+        domain: cookieDomain
       }
     }));
   }
@@ -118,6 +138,9 @@ class Server {
     this.app.use((req, res, next) => {
       res.locals.SocialLinks = SocialLinks;
       res.locals.user = req.user || null;
+      res.locals.req = req;
+      res.locals.safeJSON = (v) =>
+        JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
       next();
     });
     this.app.use(routes.build());

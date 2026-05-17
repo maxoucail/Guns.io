@@ -8,6 +8,7 @@
       <% if (user.username) { %>
         <a class="btn ghost" href="/<%= user.username %>" target="_blank" rel="noopener">Voir mon profil</a>
         <a class="btn" href="/dashboard">Dashboard</a>
+        <% if (user.is_admin) { %><a class="btn ghost" href="/admin" style="color:#ffbb33">Admin</a><% } %>
       <% } else { %>
         <a class="btn" href="/welcome">Choisir un pseudo</a>
       <% } %>

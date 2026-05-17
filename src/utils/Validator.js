@@ -48,6 +48,7 @@ class Validator {
     if (!url) return null;
     try {
       const u = new URL(url);
+      if (u.protocol === 'mailto:') return u.toString();
       if (!['http:', 'https:'].includes(u.protocol)) return null;
       return u.toString();
     } catch { return null; }

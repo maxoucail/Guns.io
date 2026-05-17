@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .user-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 2rem; }
+    @media(max-width:700px){ .user-detail { grid-template-columns: 1fr; } }
+    .detail-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+    .detail-card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-2); margin: 0 0 14px; }
+    .field { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+    .field label { font-size: 0.75rem; color: var(--fg-2); }
+    .field span { font-size: 0.9rem; color: var(--fg-0); word-break: break-all; }
+    .action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .badge-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 100px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
+    .badge-pill button { background: none; border: none; color: var(--fg-2); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0; }
+    .badge-pill button:hover { color: #fda4b1; }
+    .danger { color: #fda4b1; border-color: rgba(255,108,171,0.3); }
+  </style>
+</head>
+<body class="page-dashboard">
+  <div class="aurora dim" aria-hidden="true"><span></span><span></span><span></span></div>
+  <%- include('../partials/nav') %>
+  <main class="dash">
+    <header class="dash-head">
+      <h1 class="display small">@<%= target.username || target.id %></h1>
+      <a class="btn ghost" href="/admin/users">← Liste</a>
+    </header>
+
+    <div class="user-detail">
+      <div class="detail-card">
+        <h3>Informations</h3>
+        <div class="field"><label>ID</label><span><%= target.id %></span></div>
+        <div class="field"><label>Email</label><span><%= target.email || '—' %></span></div>
+        <div class="field"><label>Provider</label><span><%= target.provider %> / <%= target.provider_id %></span></div>
+        <div class="field"><label>Display name</label><span><%= target.display_name || '—' %></span></div>
+        <div class="field"><label>Dernière IP</label><span><%= target.last_ip || '—' %></span></div>
+        <div class="field"><label>Inscrit le</label><span><%= new Date(target.created_at).toLocaleString('fr-FR') %></span></div>
+        <div class="field"><label>Vu le</label><span><%= target.last_seen_at ? new Date(target.last_seen_at).toLocaleString('fr-FR') : '—' %></span></div>
+        <% if (profile) { %>
+        <div class="field"><label>Vues profil</label><span><%= (profile.views||0).toLocaleString('fr-FR') %></span></div>
+        <% } %>
+      </div>
+
+      <div class="detail-card">
+        <h3>Actions</h3>
+        <div class="action-row">
+          <a class="btn ghost" href="/<%= target.username %>" target="_blank">Voir profil</a>
+          <button class="btn ghost" onclick="impersonate()">Usurper</button>
+        </div>
+        <div class="action-row" style="margin-top:10px">
+          <% if (!target.is_admin) { %>
+          <button class="btn ghost" onclick="setAdmin(true)">Rendre admin</button>
+          <% } else { %>
+          <button class="btn ghost" onclick="setAdmin(false)">Retirer admin</button>
+          <% } %>
+        </div>
+        <div class="action-row" style="margin-top:10px">
+          <% if (!target.blocked) { %>
+          <input type="text" id="block-msg" placeholder="Raison du blocage (optionnel)" style="flex:1" />
+          <button class="btn danger" onclick="block()">Bloquer</button>
+          <% } else { %>
+          <div style="font-size:0.82rem;color:var(--fg-2)">Bloqué : <%= target.blocked_message || 'sans message' %></div>
+          <button class="btn ghost" onclick="unblock()">Débloquer</button>
+          <% } %>
+        </div>
+        <div class="action-row" style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
+          <button class="btn danger" onclick="deleteUser()">Supprimer le compte</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-card" style="margin-bottom:20px">
+      <h3>Badges</h3>
+      <div id="badge-list" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <% badges.forEach(function(b) { %>
+        <span class="badge-pill" style="border-color:<%= b.color %>20;background:<%= b.color %>15;color:<%= b.color %>">
+          <%= b.icon %> <%= b.name %>
+          <button onclick="revokeBadge('<%= b.id %>')" title="Retirer">×</button>
+        </span>
+        <% }); %>
+        <% if (!badges.length) { %><span style="color:var(--fg-2);font-size:0.85rem">Aucun badge</span><% } %>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="badge-select">
+          <% allBadges.forEach(function(b) { %>
+          <option value="<%= b.id %>"><%= b.icon %> <%= b.name %></option>
+          <% }); %>
+        </select>
+        <button class="btn ghost small" onclick="assignBadge()">Attribuer</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const uid = '<%- target.id %>';
+    const api = (url, method = 'POST', body = null) =>
+      fetch(url, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : null })
+        .then(r => r.json());
+
+    async function setAdmin(v) {
+      const r = await api(`/admin/users/${uid}/admin`, 'POST', { is_admin: v ? '1' : '0' });
+      if (r.ok) location.reload();
+    }
+    async function block() {
+      const msg = document.getElementById('block-msg')?.value || '';
+      const r = await api(`/admin/users/${uid}/block`, 'POST', { message: msg });
+      if (r.ok) location.reload();
+    }
+    async function unblock() {
+      const r = await api(`/admin/users/${uid}/unblock`);
+      if (r.ok) location.reload();
+    }
+    async function deleteUser() {
+      if (!confirm('Supprimer définitivement ce compte ?')) return;
+      const r = await api(`/admin/users/${uid}`, 'DELETE');
+      if (r.ok) location.href = '/admin/users';
+    }
+    async function impersonate() {
+      const r = await api(`/admin/users/${uid}/impersonate`);
+      if (r.ok) location.href = r.redirect || '/dashboard';
+    }
+    async function assignBadge() {
+      const bid = document.getElementById('badge-select').value;
+      const r = await api(`/admin/badges/${bid}/assign/${uid}`);
+      if (r.ok) location.reload();
+    }
+    async function revokeBadge(bid) {
+      const r = await api(`/admin/badges/${bid}/revoke/${uid}`, 'DELETE');
+      if (r.ok) location.reload();
+    }
+  </script>
+</body>
+</html>
