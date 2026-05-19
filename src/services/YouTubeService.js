@@ -4,10 +4,8 @@ const axios = require('axios');
 const Logger = require('../utils/Logger');
 
 const INSTANCES = [
-  'https://inv.nadeko.net',
-  'https://invidious.nerdvpn.de',
-  'https://yt.cdaut.de',
-  'https://invidious.privacydev.net',
+  'https://invidious.slipfox.xyz',
+  'https://invidious.protokolla.fi',
 ];
 
 class YouTubeService {

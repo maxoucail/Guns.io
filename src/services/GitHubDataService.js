@@ -201,6 +201,9 @@ class GitHubDataService {
 
   // ── Write queue (serialize writes to avoid conflicts) ───────
   _enqueueWrite(fn) {
+    if (!this.isConfigured()) {
+      return Promise.resolve();
+    }
     this._writeQueue = this._writeQueue.then(fn).catch(async (err) => {
       Logger.error('GitHubDataService: write failed, retrying', err.message);
       for (let i = 0; i < MAX_WRITE_RETRIES; i++) {
@@ -420,6 +423,7 @@ class GitHubDataService {
 
   // Flush cache views to GitHub (call periodically or on shutdown)
   async flushViews() {
+    if (!this.isConfigured()) return;
     for (const [userId, profile] of this._cache.profiles) {
       try {
         await this._putFile(`data/profiles/${userId}.json`, JSON.stringify(profile, null, 2), `update views ${userId}`);
