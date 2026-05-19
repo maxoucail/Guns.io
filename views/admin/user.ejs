@@ -92,7 +92,7 @@
   </main>
 
   <script>
-    const uid = '<%- target.id %>';
+    const uid = '<%= target.id %>';
     const api = (url, method = 'POST', body = null) =>
       fetch(url, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : null })
         .then(r => r.json());

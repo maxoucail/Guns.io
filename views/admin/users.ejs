@@ -44,14 +44,13 @@
         </thead>
         <tbody>
           <% users.forEach(function(u) { %>
-          <% const profile = null; %>
           <tr>
             <td><div class="user-avatar" style="<%= u.avatar_url ? 'background-image:url(' + u.avatar_url + ')' : '' %>"></div></td>
             <td><a class="link" href="/admin/users/<%= u.id %>">@<%= u.username || '—' %></a></td>
             <td style="color:var(--fg-2)"><%= u.email || '—' %></td>
             <td style="color:var(--fg-2)"><%= u.provider %></td>
             <td style="color:var(--fg-2);font-size:0.75rem"><%= u.last_ip || '—' %></td>
-            <td style="color:var(--fg-2)">—</td>
+            <td style="color:var(--fg-2)"><%= ((profileMap[u.id]||{}).views||0).toLocaleString('fr-FR') %></td>
             <td style="color:var(--fg-2)"><%= new Date(u.created_at).toLocaleDateString('fr-FR') %></td>
             <td>
               <% if (u.is_admin) { %><span class="badge-admin">Admin</span> <% } %>

@@ -10,8 +10,8 @@ const session = require('express-session');
 const passport = require('passport');
 
 const Config = require('./config/Config');
-const Db = require('./config/Database');
-const SessionStore = require('./config/SessionStore');
+const GhData = require('./services/GitHubDataService');
+const FileSessionStore = require('./config/FileSessionStore');
 const PassportConfig = require('./config/Passport');
 const Logger = require('./utils/Logger');
 const routes = require('./routes');
@@ -32,6 +32,7 @@ class Server {
     this._configurePassport();
     this._configureRoutes();
     this._configureErrors();
+    await this._initDataService();
 
     return new Promise((resolve) => {
       this.server = this.app.listen(this.config.port, () => {
@@ -46,7 +47,19 @@ class Server {
     [this.config.paths.data, this.config.paths.uploads].forEach((p) => {
       if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
     });
-    Db.prepare('SELECT 1').get();
+  }
+
+  async _initDataService() {
+    if (!GhData.isConfigured()) {
+      Logger.warn('GitHubDataService: non configuré — les données seront uniquement en mémoire !');
+      return;
+    }
+    await GhData.init();
+    // Periodic views flush (every 5 minutes) to survive crashes
+    this._viewsInterval = setInterval(() => {
+      GhData.flushViews().catch(() => {});
+    }, 5 * 60 * 1000);
+    this._viewsInterval.unref();
   }
 
   _configureApp() {
@@ -91,9 +104,9 @@ class Server {
           'img-src': ["'self'", 'data:', 'https:'],
           'media-src': ["'self'", 'https://cdnt-preview.dzcdn.net', 'https://cdns-preview-*.dzcdn.net', 'https:'],
           'script-src': ["'self'", "'unsafe-inline'"],
-          'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-          'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
-          'connect-src': ["'self'"],
+          'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+          'font-src': ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com', 'data:'],
+          'connect-src': ["'self'", 'https://api.deezer.com', 'https://cdns-preview-e.dzcdn.net', 'https://cdns-preview-f.dzcdn.net'],
           'frame-src': ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
           'frame-ancestors': ["'none'"]
         }
@@ -112,8 +125,10 @@ class Server {
       }
     } catch { }
 
+    this.sessionStore = new FileSessionStore();
+
     this.app.use(session({
-      store: new SessionStore(),
+      store: this.sessionStore,
       secret: this.config.sessionSecret,
       resave: false,
       saveUninitialized: false,
@@ -163,8 +178,11 @@ class Server {
   }
 
   _wireShutdown() {
-    const close = (sig) => () => {
+    const close = (sig) => async () => {
       Logger.info(`Worker ${process.pid} arrêt (${sig})`);
+      // Flush views with timeout
+      try { await Promise.race([GhData.flushViews(), new Promise(r => setTimeout(r, 5000))]); } catch {}
+      if (this.sessionStore) this.sessionStore.close();
       this.server.close(() => process.exit(0));
       setTimeout(() => process.exit(1), 10000).unref();
     };

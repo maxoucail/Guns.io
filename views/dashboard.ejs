@@ -24,20 +24,20 @@
     <div class="dash-grid">
       <article class="card stat">
         <span class="stat-label">Vues totales</span>
-        <span class="stat-value"><%= profile.views.toLocaleString('fr-FR') %></span>
+        <span class="stat-value"><%= (profile && profile.views || 0).toLocaleString('fr-FR') %></span>
       </article>
       <article class="card stat">
         <span class="stat-label">Liens sociaux</span>
-        <span class="stat-value"><%= (profile.social_links || []).length %></span>
+        <span class="stat-value"><%= (profile && profile.social_links || []).length %></span>
       </article>
       <article class="card stat">
         <span class="stat-label">Liens custom</span>
-        <span class="stat-value"><%= (profile.custom_links || []).length %></span>
+        <span class="stat-value"><%= (profile && profile.custom_links || []).length %></span>
       </article>
       <article class="card stat">
         <span class="stat-label">Musique</span>
         <span class="stat-value mini">
-          <% if (profile.music_track && profile.music_track.title) { %>
+          <% if (profile && profile.music_track && profile.music_track.title) { %>
             <%= profile.music_track.title %>
           <% } else { %>
             <em class="muted">aucune</em>

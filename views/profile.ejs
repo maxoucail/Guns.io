@@ -93,7 +93,7 @@
     <% } %>
 
     <div class="footer-meta">
-      <span class="views"><strong><%= profile.views.toLocaleString('fr-FR') %></strong> vues</span>
+      <span class="views"><strong><%= (profile.views || 0).toLocaleString('fr-FR') %></strong> vues</span>
       <a class="brand-tiny" href="/">link2me</a>
     </div>
   </main>

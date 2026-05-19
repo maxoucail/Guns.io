@@ -2,7 +2,7 @@
 
 const crypto = require('crypto');
 const { nanoid } = require('nanoid');
-const Db = require('../config/Database');
+const GhData = require('../services/GitHubDataService');
 const Config = require('../config/Config');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
@@ -34,12 +34,7 @@ class AdminController {
   }
 
   static dashboard(req, res) {
-    const stats = {
-      users: Db.prepare('SELECT COUNT(*) as n FROM users').get().n,
-      blocked: Db.prepare('SELECT COUNT(*) as n FROM users WHERE blocked = 1').get().n,
-      admins: Db.prepare('SELECT COUNT(*) as n FROM users WHERE is_admin = 1').get().n,
-      views: Db.prepare('SELECT SUM(views) as n FROM profiles').get().n || 0
-    };
+    const stats = GhData.getStats();
     res.render('admin/index', { title: 'Admin · link2me', user: req.user, stats });
   }
 
@@ -50,7 +45,11 @@ class AdminController {
     const users = User.findAll({ page, limit, search });
     const total = User.count(search);
     const pages = Math.ceil(total / limit);
-    res.render('admin/users', { title: 'Utilisateurs · Admin', user: req.user, users, search, page, pages, total });
+    // Attach profile views for the table
+    const profiles = users.map(u => GhData.getProfile(u.id)).filter(Boolean);
+    const profileMap = {};
+    profiles.forEach(p => { profileMap[p.user_id] = p; });
+    res.render('admin/users', { title: 'Utilisateurs · Admin', user: req.user, users, search, page, pages, total, profileMap });
   }
 
   static viewUser(req, res) {
@@ -58,7 +57,7 @@ class AdminController {
     if (!u) return res.status(404).render('404', { title: '404' });
     const profile = Profile.getByUserId(u.id);
     const badges = User.getBadges(u.id);
-    const allBadges = Db.prepare('SELECT * FROM badges ORDER BY name').all();
+    const allBadges = GhData.getAllBadges();
     res.render('admin/user', { title: `@${u.username || u.id} · Admin`, user: req.user, target: u, profile, badges, allBadges });
   }
 
@@ -114,7 +113,7 @@ class AdminController {
   }
 
   static listBadges(req, res) {
-    const badges = Db.prepare('SELECT * FROM badges ORDER BY name').all();
+    const badges = GhData.getAllBadges();
     res.render('admin/badges', { title: 'Badges · Admin', user: req.user, badges });
   }
 
@@ -125,25 +124,24 @@ class AdminController {
     const color = /^#[0-9a-fA-F]{3,6}$/.test(req.body.color || '') ? req.body.color : '#7c5cff';
     if (!name) return res.status(400).json({ error: 'name_required' });
     const id = nanoid(10);
-    Db.prepare('INSERT INTO badges (id, name, description, icon, color) VALUES (?, ?, ?, ?, ?)').run(id, name, description, icon, color);
+    GhData.insertBadge({ id, name, description, icon, color });
     res.json({ ok: true, id });
   }
 
   static deleteBadge(req, res) {
-    Db.prepare('DELETE FROM badges WHERE id = ?').run(req.params.badgeId);
+    GhData.deleteBadge(req.params.badgeId);
     res.json({ ok: true });
   }
 
   static assignBadge(req, res) {
     const { userId, badgeId } = req.params;
-    try {
-      Db.prepare('INSERT OR IGNORE INTO user_badges (user_id, badge_id, awarded_at, awarded_by) VALUES (?, ?, ?, ?)').run(userId, badgeId, Date.now(), req.user.id);
-      res.json({ ok: true });
-    } catch { res.status(400).json({ error: 'failed' }); }
+    const ok = GhData.assignBadge(userId, badgeId, req.user.id);
+    if (!ok) return res.status(400).json({ error: 'already_assigned' });
+    res.json({ ok: true });
   }
 
   static revokeBadge(req, res) {
-    Db.prepare('DELETE FROM user_badges WHERE user_id = ? AND badge_id = ?').run(req.params.userId, req.params.badgeId);
+    GhData.revokeBadge(req.params.userId, req.params.badgeId);
     res.json({ ok: true });
   }
 }
