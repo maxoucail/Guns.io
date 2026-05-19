@@ -86,7 +86,7 @@ class Server {
     try {
       const base = new URL(this.config.baseUrl);
       const canonical = base.hostname;
-      const stripWww = (h) => h.replace(/^www\./, '');
+      const stripWww = (h) => h.replace(/^www\./i, '');
       this.app.use((req, res, next) => {
         if (req.hostname && stripWww(req.hostname) !== stripWww(canonical)) {
           return res.redirect(301, `${base.protocol}//${canonical}${req.url}`);
