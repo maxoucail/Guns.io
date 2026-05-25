@@ -1,133 +1,69 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title %></title>
-  <meta name="theme-color" content="#0B1020" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="/static/css/main.css" />
-  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
-  <style>
-    .legal-page {
-      min-height: 100svh;
-      padding: 6rem 1.25rem 4rem;
-      display: flex; justify-content: center;
-      background: #0B1020;
-      position: relative; overflow: hidden;
-    }
-    .legal-bg {
-      position: absolute; inset: 0; pointer-events: none;
-      background-image: linear-gradient(rgba(124,92,255,.02) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,255,.02) 1px, transparent 1px);
-      background-size: 64px 64px;
-    }
-    .legal-inner {
-      position: relative; z-index: 1;
-      max-width: 760px; width: 100%;
-      color: #e2e8f0; line-height: 1.8;
-    }
-    .legal-inner h1 {
-      font-family: 'Unbounded', sans-serif; font-weight: 800;
-      font-size: 2.1rem; letter-spacing: -.03em;
-      margin-bottom: .5rem;
-      background: linear-gradient(135deg, #7c5cff, #00d4ff);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .legal-date { color: #64748b; font-size: .85rem; margin-bottom: 2rem; }
-    .legal-inner h2 {
-      font-family: 'Unbounded', sans-serif; font-weight: 700; font-size: 1.2rem;
-      color: #fff; margin: 2rem 0 .7rem;
-    }
-    .legal-inner p { color: #94a3b8; font-size: .92rem; margin-bottom: 1rem; }
-  </style>
-</head>
-<body>
+<%- include('partials/head', { title: 'Mentions légales' }) %>
+<body class="legal-page">
+    <%- include('partials/nav', { user: typeof user !== 'undefined' ? user : null, currentPage: 'legal' }) %>
 
-<nav class="navbar" id="navbar">
-  <a href="/" class="nav-logo">
-    <img src="/static/img/favicon.svg" alt="link2me" width="32" height="32" />
-    <span class="nav-brand">link2me</span>
-  </a>
-  <div class="nav-actions">
-    <% if (locals.user) { %>
-      <a href="/dashboard" class="btn-primary">Dashboard</a>
-    <% } else { %>
-      <a href="/login" class="btn-ghost">Connexion</a>
-      <a href="/login" class="btn-primary">Commencer</a>
-    <% } %>
-  </div>
-</nav>
+    <div class="legal-container">
+        <h1>Mentions légales</h1>
+        
+        <section id="terms">
+            <h2>Conditions d'utilisation</h2>
+            <p>En utilisant Guns.io, tu acceptes ces conditions. Si tu n'es pas d'accord, n'utilise pas le service.</p>
+            <ul>
+                <li>Tu es responsable du contenu que tu publies sur ton profil.</li>
+                <li>Tout contenu illégal, haineux, ou inapproprié sera supprimé sans préavis.</li>
+                <li>Nous nous réservons le droit de suspendre ou supprimer des comptes qui violent nos conditions.</li>
+                <li>Le service est fourni "tel quel" sans garantie de disponibilité continue.</li>
+            </ul>
+        </section>
 
-<div class="legal-page">
-  <div class="legal-bg" aria-hidden="true"></div>
-  <div class="legal-inner">
-    <% if (type === 'terms') { %>
-    <h1>Conditions d'utilisation</h1>
-    <p class="legal-date">Dernière mise à jour : <%= new Date().toLocaleDateString('fr-FR') %></p>
+        <section id="privacy">
+            <h2>Politique de confidentialité</h2>
+            <p>Nous collectons uniquement les données nécessaires au fonctionnement du service :</p>
+            <ul>
+                <li><strong>Données GitHub :</strong> nom d'utilisateur, avatar, et email (pour l'authentification OAuth).</li>
+                <li><strong>Données de profil :</strong> les informations que tu choisis d'afficher sur ta page publique (bio, liens, thème, etc.).</li>
+                <li><strong>Cookies :</strong> nous utilisons des cookies de session pour maintenir ta connexion.</li>
+                <li><strong>Statistiques :</strong> nous collectons des données anonymes de visites pour améliorer le service.</li>
+            </ul>
+            <p>Nous ne vendons ni ne partageons tes données avec des tiers. Tes données sont stockées de manière sécurisée via GitHub.</p>
+        </section>
 
-    <h2>1. Acceptation des conditions</h2>
-    <p>En accédant à link2me et en utilisant nos services, vous acceptez d'être lié par ces conditions d'utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre service.</p>
+        <section id="gdpr">
+            <h2>RGPD — Tes droits</h2>
+            <p>Conformément au RGPD, tu disposes des droits suivants :</p>
+            <ul>
+                <li><strong>Droit d'accès :</strong> tu peux demander une copie de toutes tes données.</li>
+                <li><strong>Droit de rectification :</strong> tu peux modifier tes informations à tout moment.</li>
+                <li><strong>Droit à l'effacement :</strong> tu peux demander la suppression totale de ton compte et de tes données.</li>
+                <li><strong>Droit à la portabilité :</strong> tu peux exporter tes données dans un format lisible.</li>
+            </ul>
+            <p>Pour exercer ces droits, contacte-nous via GitHub Issues ou directement via ton dashboard.</p>
+        </section>
 
-    <h2>2. Description du service</h2>
-    <p>link2me est une plateforme permettant aux utilisateurs de créer une page personnalisée regroupant leurs liens de réseaux sociaux et autres contenus. Le service est fourni gratuitement et sans abonnement caché.</p>
-
-    <h2>3. Compte utilisateur</h2>
-    <p>Vous êtes responsable de la sécurité de votre compte et de toutes les activités qui s'y produisent. Vous devez nous notifier immédiatement en cas d'utilisation non autorisée de votre compte.</p>
-
-    <h2>4. Contenu interdit</h2>
-    <p>Il est interdit de publier du contenu illégal, offensant, trompeur, ou violant les droits de tiers. Nous nous réservons le droit de supprimer tout contenu non conforme à ces règles.</p>
-
-    <h2>5. Propriété intellectuelle</h2>
-    <p>Le contenu que vous publiez sur link2me vous appartient. En le publiant, vous nous accordez une licence limitée pour l'afficher dans le cadre du service.</p>
-
-    <h2>6. Limitation de responsabilité</h2>
-    <p>link2me est fourni "tel quel" sans garantie d'aucune sorte. Nous ne sommes pas responsables des dommages indirects résultant de l'utilisation du service.</p>
-
-    <h2>7. Modifications</h2>
-    <p>Nous nous réservons le droit de modifier ces conditions à tout moment. Les utilisateurs seront notifiés des changements importants.</p>
-
-    <% } else { %>
-    <h1>Politique de confidentialité</h1>
-    <p class="legal-date">Dernière mise à jour : <%= new Date().toLocaleDateString('fr-FR') %></p>
-
-    <h2>1. Données collectées</h2>
-    <p>Nous collectons uniquement les données nécessaires au fonctionnement du service : adresse e-mail, nom d'utilisateur, et contenu de votre page. Nous ne vendons jamais vos données à des tiers.</p>
-
-    <h2>2. Utilisation des données</h2>
-    <p>Vos données sont utilisées exclusivement pour faire fonctionner et améliorer le service link2me. Nous n'utilisons pas vos données à des fins publicitaires.</p>
-
-    <h2>3. Cookies</h2>
-    <p>Nous utilisons des cookies techniques essentiels au fonctionnement du site (session, préférences). Aucun cookie de tracking ou publicitaire n'est utilisé.</p>
-
-    <h2>4. Vos droits (RGPD)</h2>
-    <p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, de suppression et de portabilité de vos données. Contactez-nous pour exercer ces droits.</p>
-
-    <h2>5. Sécurité</h2>
-    <p>Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles pour protéger vos données contre tout accès non autorisé.</p>
-
-    <h2>6. Hébergement</h2>
-    <p>Les données sont hébergées sur des serveurs situés dans l'Union Européenne et sont soumises aux lois européennes de protection des données.</p>
-
-    <h2>7. Contact</h2>
-    <p>Pour toute question relative à vos données personnelles, vous pouvez nous contacter via notre page de support.</p>
-    <% } %>
-  </div>
-</div>
-
-<footer class="footer" style="background:#06060f;border-top:1px solid rgba(124,92,255,.1);padding:2rem 1.25rem;text-align:center">
-  <div class="footer-inner" style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
-    <div class="footer-brand" style="display:flex;align-items:center;gap:.5rem">
-      <img src="/static/img/favicon.svg" width="24" height="24" alt="link2me" />
-      <span style="color:#e2e8f0;font-family:'Unbounded',sans-serif;font-weight:700">link2me</span>
+        <section>
+            <h2>Contact</h2>
+            <p>Pour toute question ou demande, ouvre une issue sur notre dépôt GitHub ou contacte-nous via le dashboard.</p>
+        </section>
     </div>
-    <div class="footer-links" style="display:flex;gap:1.5rem">
-      <a href="/terms" style="color:#64748b;text-decoration:none;font-size:.85rem">Conditions d'utilisation</a>
-      <a href="/privacy" style="color:#64748b;text-decoration:none;font-size:.85rem">Politique de confidentialité</a>
-    </div>
-    <div class="footer-copy" style="color:#475569;font-size:.8rem">&copy; <%= new Date().getFullYear() %> link2me. Tous droits réservés.</div>
-  </div>
-</footer>
+
+    <footer class="footer" style="margin-top:60px;">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="/" class="footer-logo">
+                    <i class="fa-solid fa-gun"></i>
+                    Guns.io
+                </a>
+                <p>Le meilleur créateur de pages de liens.</p>
+            </div>
+            <div class="footer-links">
+                <a href="/legal">Mentions légales</a>
+                <a href="/legal#privacy">Confidentialité</a>
+                <a href="/legal#terms">Conditions</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; <%= new Date().getFullYear() %> Guns.io</p>
+        </div>
+    </footer>
 </body>
 </html>

@@ -1,0 +1,181 @@
+<%- include('../partials/head', { title: 'Finaliser ton profil' }) %>
+<body class="onboarding-page">
+    <div class="onboarding-container">
+        <div class="onboarding-header">
+            <a href="/" class="onboarding-logo">
+                <i class="fa-solid fa-gun"></i>
+                <span>Guns.io</span>
+            </a>
+            <div class="onboarding-steps">
+                <div class="onboarding-step active" data-step="1">
+                    <div class="onboarding-step-circle">1</div>
+                    <span>Profil</span>
+                </div>
+                <div class="onboarding-step" data-step="2">
+                    <div class="onboarding-step-circle">2</div>
+                    <span>Thème</span>
+                </div>
+                <div class="onboarding-step" data-step="3">
+                    <div class="onboarding-step-circle">3</div>
+                    <span>Finaliser</span>
+                </div>
+            </div>
+        </div>
+
+        <form action="/onboarding" method="POST" class="onboarding-form" id="onboardingForm">
+            <!-- Step 1: Profile Info -->
+            <div class="onboarding-panel active" data-panel="1">
+                <h2>Complète ton profil</h2>
+                <p>Ces informations seront visibles sur ta page publique.</p>
+                
+                <div class="form-group">
+                    <label for="username">Nom d'utilisateur</label>
+                    <div class="input-wrapper">
+                        <span class="input-prefix">guns.io/</span>
+                        <input type="text" id="username" name="username" placeholder="tonpseudo" required pattern="[a-zA-Z0-9_-]{3,30}" autocomplete="off">
+                    </div>
+                    <span class="form-hint">3-30 caractères. Lettres, chiffres, tirets et underscores.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="displayName">Nom affiché</label>
+                    <input type="text" id="displayName" name="displayName" placeholder="Ton nom ou pseudo" maxlength="50">
+                    <span class="form-hint">Optionnel. Apparaîtra en haut de ton profil.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="bio">Bio</label>
+                    <textarea id="bio" name="bio" placeholder="Parle de toi en quelques mots..." rows="3" maxlength="300"></textarea>
+                    <span class="form-hint char-count"><span id="bioCount">0</span>/300</span>
+                </div>
+            </div>
+
+            <!-- Step 2: Theme -->
+            <div class="onboarding-panel" data-panel="2">
+                <h2>Choisis ton thème</h2>
+                <p>Tu pourras le modifier plus tard dans l'éditeur.</p>
+                
+                <div class="theme-grid" id="themeGrid">
+                    <% const themes = [
+                        { id: 'dark', name: 'Dark', colors: ['#0a0a0a', '#1a1a2e', '#e94560'] },
+                        { id: 'midnight', name: 'Midnight', colors: ['#0f0f23', '#1a1a3e', '#7b2ff7'] },
+                        { id: 'ocean', name: 'Ocean', colors: ['#0a1628', '#0d2137', '#00d4ff'] },
+                        { id: 'sunset', name: 'Sunset', colors: ['#1a0a0a', '#2d1b1b', '#ff6b35'] },
+                        { id: 'forest', name: 'Forest', colors: ['#0a1a0a', '#1b2d1b', '#00ff88'] },
+                        { id: 'neon', name: 'Neon', colors: ['#0a0a0a', '#1a0033', '#ff00ff'] }
+                    ]; %>
+                    <% themes.forEach(function(theme) { %>
+                    <label class="theme-card">
+                        <input type="radio" name="theme" value="<%= theme.id %>" <%= theme.id === 'dark' ? 'checked' : '' %>>
+                        <div class="theme-preview">
+                            <div class="theme-preview-colors">
+                                <% theme.colors.forEach(function(color) { %>
+                                <span style="background:<%= color %>"></span>
+                                <% }); %>
+                            </div>
+                            <span class="theme-name"><%= theme.name %></span>
+                        </div>
+                    </label>
+                    <% }); %>
+                </div>
+            </div>
+
+            <!-- Step 3: Confirmation -->
+            <div class="onboarding-panel" data-panel="3">
+                <h2>Tout est prêt ! 🎉</h2>
+                <p>Ton profil est configuré. Tu pourras tout personnaliser dans l'éditeur.</p>
+                
+                <div class="onboarding-summary">
+                    <div class="onboarding-summary-item">
+                        <i class="fa-solid fa-at"></i>
+                        <span>guns.io/<strong id="summaryUsername">tonpseudo</strong></span>
+                    </div>
+                    <div class="onboarding-summary-item">
+                        <i class="fa-solid fa-palette"></i>
+                        <span>Thème <strong id="summaryTheme">Dark</strong></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="gdprConsent" required>
+                        <span>J'accepte que mes données soient stockées conformément à la <a href="/legal#privacy" target="_blank">politique de confidentialité</a>.</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="onboarding-actions">
+                <button type="button" class="btn btn-ghost" id="prevStep" style="display:none;">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Précédent
+                </button>
+                <button type="button" class="btn btn-primary" id="nextStep">
+                    Suivant
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <button type="submit" class="btn btn-primary btn-glow" id="submitOnboarding" style="display:none;">
+                    <i class="fa-solid fa-check"></i>
+                    Créer mon profil
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="onboarding-bg">
+        <div class="onboarding-bg-grid"></div>
+    </div>
+
+    <script>
+    const form = document.getElementById('onboardingForm');
+    const panels = document.querySelectorAll('.onboarding-panel');
+    const steps = document.querySelectorAll('.onboarding-step');
+    const prevBtn = document.getElementById('prevStep');
+    const nextBtn = document.getElementById('nextStep');
+    const submitBtn = document.getElementById('submitOnboarding');
+    const bioInput = document.getElementById('bio');
+    const bioCount = document.getElementById('bioCount');
+    let currentStep = 1;
+
+    bioInput?.addEventListener('input', () => {
+        bioCount.textContent = bioInput.value.length;
+    });
+
+    document.getElementById('username')?.addEventListener('input', function() {
+        document.getElementById('summaryUsername').textContent = this.value || 'tonpseudo';
+    });
+
+    document.querySelectorAll('input[name="theme"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.getElementById('summaryTheme').textContent = this.closest('.theme-card').querySelector('.theme-name').textContent;
+        });
+    });
+
+    function showStep(step) {
+        panels.forEach(p => p.classList.remove('active'));
+        steps.forEach(s => s.classList.remove('active', 'completed'));
+        
+        document.querySelector(`[data-panel="${step}"]`).classList.add('active');
+        
+        for (let i = 1; i <= 3; i++) {
+            if (i < step) steps[i-1].classList.add('completed');
+            if (i === step) steps[i-1].classList.add('active');
+        }
+
+        prevBtn.style.display = step === 1 ? 'none' : '';
+        nextBtn.style.display = step === 3 ? 'none' : '';
+        submitBtn.style.display = step === 3 ? '' : 'none';
+        
+        currentStep = step;
+    }
+
+    prevBtn.addEventListener('click', () => { if (currentStep > 1) showStep(currentStep - 1); });
+    nextBtn.addEventListener('click', () => {
+        const panel = document.querySelector(`[data-panel="${currentStep}"]`);
+        const inputs = panel.querySelectorAll('input[required], textarea[required]');
+        let valid = true;
+        inputs.forEach(input => { if (!input.checkValidity()) { input.reportValidity(); valid = false; } });
+        if (valid && currentStep < 3) showStep(currentStep + 1);
+    });
+    </script>
+</body>
+</html>

@@ -1,246 +1,311 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <%- include('partials/head') %>
-  <link rel="stylesheet" href="/static/css/editor.css" />
-</head>
-<body class="page-editor">
-  <div class="aurora dim" aria-hidden="true"><span></span><span></span><span></span></div>
+<%- include('partials/head', { title: 'Éditeur de profil' }) %>
+<link rel="stylesheet" href="/static/css/editor.css">
+<body class="editor-page">
+    <%- include('partials/nav', { user: user, currentPage: 'editor' }) %>
 
-  <header class="editor-bar">
-    <a href="/dashboard" class="brand">
-      <span class="brand-mark"></span>
-      <span class="brand-name">link2me</span>
-    </a>
-    <div class="editor-url">link2me.fr/<strong>@<%= user.username %></strong></div>
-    <div class="editor-bar-actions">
-      <a class="btn ghost" href="/<%= user.username %>" target="_blank" rel="noopener">Voir le profil</a>
-      <a class="btn ghost" href="/dashboard">Quitter</a>
+    <div class="editor-container">
+        <!-- Left Panel: Controls -->
+        <div class="editor-sidebar">
+            <div class="editor-sidebar-header">
+                <h2><i class="fa-solid fa-pen-to-square"></i> Éditeur</h2>
+                <p>Personnalise chaque détail de ton profil.</p>
+            </div>
+
+            <!-- Sections / Tabs -->
+            <div class="editor-tabs">
+                <button class="editor-tab active" data-tab="general">
+                    <i class="fa-solid fa-user"></i>
+                    Général
+                </button>
+                <button class="editor-tab" data-tab="appearance">
+                    <i class="fa-solid fa-palette"></i>
+                    Apparence
+                </button>
+                <button class="editor-tab" data-tab="links">
+                    <i class="fa-solid fa-link"></i>
+                    Liens
+                </button>
+                <button class="editor-tab" data-tab="effects">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    Effets
+                </button>
+                <button class="editor-tab" data-tab="music">
+                    <i class="fa-solid fa-music"></i>
+                    Musique
+                </button>
+                <button class="editor-tab" data-tab="social">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    Réseaux
+                </button>
+            </div>
+
+            <form id="editorForm" class="editor-form">
+                <!-- General Panel -->
+                <div class="editor-panel active" data-panel="general">
+                    <div class="form-group">
+                        <label>Avatar</label>
+                        <div class="avatar-upload">
+                            <img src="<%= pageConfig?.avatarUrl || 'https://github.com/' + user.username + '.png?size=80' %>" alt="Avatar" id="avatarPreview">
+                            <input type="file" name="avatar" accept="image/*" id="avatarInput">
+                            <label for="avatarInput" class="btn btn-small btn-ghost">
+                                <i class="fa-solid fa-camera"></i> Changer
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="displayName">Nom affiché</label>
+                        <input type="text" id="displayName" name="displayName" value="<%= pageConfig?.displayName || '' %>" placeholder="Ton nom" maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="bio">Bio</label>
+                        <textarea id="bio" name="bio" placeholder="Décris-toi en quelques mots..." rows="4" maxlength="300"><%= pageConfig?.bio || '' %></textarea>
+                        <span class="form-hint char-count"><span id="bioCount">0</span>/300</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="pronouns">Pronoms</label>
+                        <input type="text" id="pronouns" name="pronouns" value="<%= profile?.pronouns || '' %>" placeholder="il/lui, elle/elle, iel..." maxlength="20">
+                    </div>
+                </div>
+
+                <!-- Appearance Panel -->
+                <div class="editor-panel" data-panel="appearance">
+                    <div class="form-group">
+                        <label>Thème</label>
+                        <div class="theme-selector">
+                            <% const themes = [
+                                { id: 'dark', name: 'Dark', bg: '#0a0a0a', accent: '#e94560' },
+                                { id: 'midnight', name: 'Midnight', bg: '#0f0f23', accent: '#7b2ff7' },
+                                { id: 'ocean', name: 'Ocean', bg: '#0a1628', accent: '#00d4ff' },
+                                { id: 'sunset', name: 'Sunset', bg: '#1a0a0a', accent: '#ff6b35' },
+                                { id: 'forest', name: 'Forest', bg: '#0a1a0a', accent: '#00ff88' },
+                                { id: 'neon', name: 'Neon', bg: '#0a0a0a', accent: '#ff00ff' },
+                                { id: 'cyberpunk', name: 'Cyberpunk', bg: '#0d0221', accent: '#ff2a6d' },
+                                { id: 'dracula', name: 'Dracula', bg: '#282a36', accent: '#bd93f9' },
+                                { id: 'nord', name: 'Nord', bg: '#2e3440', accent: '#88c0d0' },
+                                { id: 'monokai', name: 'Monokai', bg: '#272822', accent: '#a6e22e' },
+                                { id: 'gruvbox', name: 'Gruvbox', bg: '#282828', accent: '#fabd2f' },
+                                { id: 'solarized', name: 'Solarized', bg: '#002b36', accent: '#2aa198' }
+                            ]; %>
+                            <% themes.forEach(function(theme) { %>
+                            <label class="theme-option <%= (pageConfig?.theme || 'dark') === theme.id ? 'selected' : '' %>">
+                                <input type="radio" name="theme" value="<%= theme.id %>" <%= (pageConfig?.theme || 'dark') === theme.id ? 'checked' : '' %>>
+                                <span class="theme-swatch" style="background:<%= theme.bg %>">
+                                    <span class="theme-swatch-accent" style="background:<%= theme.accent %>"></span>
+                                </span>
+                                <span class="theme-label"><%= theme.name %></span>
+                            </label>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="font">Police</label>
+                        <select id="font" name="font">
+                            <% const fonts = ['Inter', 'Space Grotesk', 'JetBrains Mono', 'Outfit', 'Plus Jakarta Sans', 'Sora', 'DM Sans', 'Manrope', 'Poppins', 'Playfair Display', 'Caveat', 'Press Start 2P', 'Bebas Neue', 'Pacifico', 'Monoton']; %>
+                            <% fonts.forEach(function(font) { %>
+                            <option value="<%= font %>" <%= pageConfig?.font === font ? 'selected' : '' %>><%= font %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="primaryColor">Couleur principale</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="primaryColor" name="accentColor" value="<%= pageConfig?.accentColor || '#e94560' %>">
+                            <input type="text" id="primaryColorText" value="<%= pageConfig?.accentColor || '#e94560' %>" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bgOpacity">Opacité du fond</label>
+                        <input type="range" id="bgOpacity" name="overlayOpacity" min="0" max="100" value="<%= pageConfig?.overlayOpacity ?? 95 %>">
+                        <span class="range-value"><%= pageConfig?.overlayOpacity ?? 95 %>%</span>
+                    </div>
+                </div>
+
+                <!-- Links Panel -->
+                <div class="editor-panel" data-panel="links">
+                    <div class="links-container" id="linksContainer">
+                        <% if (pageConfig?.custom_links?.length) { %>
+                            <% pageConfig.custom_links.forEach(function(link, index) { %>
+                            <div class="link-item" data-index="<%= index %>">
+                                <div class="link-item-header">
+                                    <span class="link-item-drag"><i class="fa-solid fa-grip-vertical"></i></span>
+                                    <input type="text" name="custom_links[<%= index %>][label]" value="<%= link.label %>" placeholder="Titre du lien" class="link-title">
+                                    <button type="button" class="link-item-remove" onclick="this.closest('.link-item').remove()">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                                <input type="url" name="custom_links[<%= index %>][url]" value="<%= link.url %>" placeholder="https://..." class="link-url">
+                                <select name="custom_links[<%= index %>][icon]" class="link-icon-select">
+                                    <option value="">Pas d'icône</option>
+                                    <option value="fa-github" <%= link.icon === 'fa-github' ? 'selected' : '' %>>GitHub</option>
+                                    <option value="fa-youtube" <%= link.icon === 'fa-youtube' ? 'selected' : '' %>>YouTube</option>
+                                    <option value="fa-x-twitter" <%= link.icon === 'fa-x-twitter' ? 'selected' : '' %>>Twitter/X</option>
+                                    <option value="fa-discord" <%= link.icon === 'fa-discord' ? 'selected' : '' %>>Discord</option>
+                                    <option value="fa-instagram" <%= link.icon === 'fa-instagram' ? 'selected' : '' %>>Instagram</option>
+                                    <option value="fa-twitch" <%= link.icon === 'fa-twitch' ? 'selected' : '' %>>Twitch</option>
+                                    <option value="fa-tiktok" <%= link.icon === 'fa-tiktok' ? 'selected' : '' %>>TikTok</option>
+                                    <option value="fa-spotify" <%= link.icon === 'fa-spotify' ? 'selected' : '' %>>Spotify</option>
+                                    <option value="fa-solid fa-globe" <%= link.icon === 'fa-solid fa-globe' ? 'selected' : '' %>>Site web</option>
+                                    <option value="fa-solid fa-envelope" <%= link.icon === 'fa-solid fa-envelope' ? 'selected' : '' %>>Email</option>
+                                </select>
+                            </div>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                    <button type="button" class="btn btn-ghost btn-full" id="addLink">
+                        <i class="fa-solid fa-plus"></i>
+                        Ajouter un lien
+                    </button>
+                </div>
+
+                <!-- Effects Panel -->
+                <div class="editor-panel" data-panel="effects">
+                    <div class="form-group">
+                        <label>Effet de fond</label>
+                        <div class="effects-grid">
+                            <% const effectList = [
+                                { id: 'none', name: 'Aucun', icon: 'fa-ban' },
+                                { id: 'stars', name: 'Étoiles', icon: 'fa-star' },
+                                { id: 'snow', name: 'Neige', icon: 'fa-snowflake' },
+                                { id: 'bubbles', name: 'Bulles', icon: 'fa-circle' },
+                                { id: 'matrix', name: 'Matrix', icon: 'fa-digital-tiling' },
+                                { id: 'fireflies', name: 'Lucioles', icon: 'fa-fire' },
+                                { id: 'confetti', name: 'Confetti', icon: 'fa-party-horn' },
+                                { id: 'rain', name: 'Pluie', icon: 'fa-droplet' }
+                            ]; %>
+                            <% effectList.forEach(function(eff) { %>
+                            <label class="effect-option <%= (pageConfig?.particles || 'none') === eff.id ? 'selected' : '' %>">
+                                <input type="radio" name="particles" value="<%= eff.id %>" <%= (pageConfig?.particles || 'none') === eff.id ? 'checked' : '' %>>
+                                <i class="fa-solid <%= eff.icon %>"></i>
+                                <span><%= eff.name %></span>
+                            </label>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Cursor personnalisé</label>
+                        <select name="cursorEffect">
+                            <option value="none" <%= pageConfig?.cursorEffect === 'none' ? 'selected' : '' %>>Normal</option>
+                            <option value="trail" <%= pageConfig?.cursorEffect === 'trail' ? 'selected' : '' %>>Trail</option>
+                            <option value="sparkle" <%= pageConfig?.cursorEffect === 'sparkle' ? 'selected' : '' %>>Sparkle</option>
+                            <option value="glow" <%= pageConfig?.cursorEffect === 'glow' ? 'selected' : '' %>>Glow</option>
+                            <option value="dot" <%= pageConfig?.cursorEffect === 'dot' ? 'selected' : '' %>>Dot</option>
+                            <option value="ring" <%= pageConfig?.cursorEffect === 'ring' ? 'selected' : '' %>>Ring</option>
+                            <option value="star" <%= pageConfig?.cursorEffect === 'star' ? 'selected' : '' %>>Star</option>
+                            <option value="heart" <%= pageConfig?.cursorEffect === 'heart' ? 'selected' : '' %>>Heart</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="usernameEffect" value="glitch" <%= pageConfig?.usernameEffect === 'glitch' ? 'checked' : '' %>>
+                            <span>Effet Glitch sur le texte</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="gradientBorder" <%= pageConfig?.bgType === 'gradient' ? 'checked' : '' %>>
+                            <span>Bordures animées (gradient)</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="showBadges" <%= pageConfig?.showBadges !== false ? 'checked' : '' %>>
+                            <span>Afficher les badges</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Music Panel -->
+                <div class="editor-panel" data-panel="music">
+                    <div class="form-group">
+                        <label>Rechercher de la musique</label>
+                        <div class="music-search-wrapper">
+                            <input type="text" id="musicSearch" placeholder="Artiste ou titre..." autocomplete="off">
+                            <select id="musicSource">
+                                <option value="deezer">Deezer</option>
+                                <option value="youtube">YouTube</option>
+                            </select>
+                        </div>
+                        <div class="music-results" id="musicResults"></div>
+                    </div>
+                    <% if (pageConfig?.music) { %>
+                    <div class="music-playlist">
+                        <label>Ta musique</label>
+                        <div class="music-track">
+                            <img src="<%= pageConfig.music.cover || '' %>" alt="<%= pageConfig.music.title %>" class="music-track-cover" onerror="this.style.display='none'">
+                            <div class="music-track-info">
+                                <span class="music-track-title"><%= pageConfig.music.title %></span>
+                                <span class="music-track-artist"><%= pageConfig.music.artist %></span>
+                            </div>
+                            <input type="hidden" name="music[]" value="<%= safeJSON(pageConfig.music) %>">
+                            <button type="button" class="btn btn-small btn-danger" onclick="this.closest('.music-playlist').innerHTML=''">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- Social Panel -->
+                <div class="editor-panel" data-panel="social">
+                    <div class="form-group">
+                        <label for="socialGithub">GitHub</label>
+                        <input type="text" id="socialGithub" name="social_links[github]" value="<%= (pageConfig?.social_links || []).find(s => s.platform === 'github')?.value || user.username %>" placeholder="Nom d'utilisateur GitHub">
+                    </div>
+                    <div class="form-group">
+                        <label for="socialTwitter">Twitter / X</label>
+                        <input type="text" id="socialTwitter" name="social_links[twitter]" value="<%= (pageConfig?.social_links || []).find(s => s.platform === 'twitter')?.value || '' %>" placeholder="@toncompte">
+                    </div>
+                    <div class="form-group">
+                        <label for="socialDiscord">Discord</label>
+                        <input type="text" id="socialDiscord" name="social_links[discord]" value="<%= (pageConfig?.social_links || []).find(s => s.platform === 'discord')?.value || '' %>" placeholder="tonpseudo">
+                    </div>
+                    <div class="form-group">
+                        <label for="socialYoutube">YouTube</label>
+                        <input type="url" id="socialYoutube" name="social_links[youtube]" value="<%= (pageConfig?.social_links || []).find(s => s.platform === 'youtube')?.value || '' %>" placeholder="https://youtube.com/@...">
+                    </div>
+                    <div class="form-group">
+                        <label for="socialTwitch">Twitch</label>
+                        <input type="text" id="socialTwitch" name="social_links[twitch]" value="<%= (pageConfig?.social_links || []).find(s => s.platform === 'twitch')?.value || '' %>" placeholder="twitch.tv/...">
+                    </div>
+                    <div class="form-group">
+                        <label for="socialInstagram">Instagram</label>
+                        <input type="text" id="socialInstagram" name="social_links[instagram]" value="<%= (pageConfig?.social_links || []).find(s => s.platform === 'instagram')?.value || '' %>" placeholder="@toncompte">
+                    </div>
+                    <div class="form-group">
+                        <label for="socialTiktok">TikTok</label>
+                        <input type="text" id="socialTiktok" name="social_links[tiktok]" value="<%= (pageConfig?.social_links || []).find(s => s.platform === 'tiktok')?.value || '' %>" placeholder="@toncompte">
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="editor-actions">
+                    <button type="submit" class="btn btn-primary btn-glow btn-full" id="saveProfile">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Sauvegarder les modifications
+                    </button>
+                    <button type="button" class="btn btn-ghost btn-full" id="resetProfile">
+                        <i class="fa-solid fa-rotate"></i>
+                        Réinitialiser
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Panel: Live Preview -->
+        <div class="editor-preview">
+            <div class="editor-preview-header">
+                <h3><i class="fa-solid fa-eye"></i> Aperçu en direct</h3>
+                <div class="preview-device-toggle">
+                    <button class="active" data-device="desktop"><i class="fa-solid fa-desktop"></i></button>
+                    <button data-device="mobile"><i class="fa-solid fa-mobile-screen"></i></button>
+                </div>
+            </div>
+            <div class="preview-frame">
+                <iframe src="/<%= user.username %>?preview=true" id="previewFrame" sandbox="allow-same-origin allow-scripts" onload="this.contentWindow.document.body.classList.add('preview-mode')"></iframe>
+            </div>
+        </div>
     </div>
-  </header>
 
-  <main class="editor-shell">
-    <aside class="editor-panel" id="editor-panel">
-      <nav class="tabs">
-        <button class="tab active" data-tab="identity">Identité</button>
-        <button class="tab" data-tab="design">Design</button>
-        <button class="tab" data-tab="music">Musique</button>
-        <button class="tab" data-tab="links">Liens</button>
-        <button class="tab" data-tab="effects">Effets</button>
-      </nav>
-
-      <section class="tab-panel active" data-panel="identity">
-        <h3>Avatar</h3>
-        <div class="row">
-          <div class="thumb" id="thumb-avatar" style="background-image:url('<%= profile.avatar || user.avatar_url || '' %>')"></div>
-          <div class="col">
-            <label class="btn ghost small">
-              Changer
-              <input type="file" accept="image/*" data-upload="avatar" hidden />
-            </label>
-            <% if (user.provider === 'discord' || user.provider === 'google') { %>
-            <button class="btn ghost small" id="avatar-from-provider">Photo <%= user.provider === 'discord' ? 'Discord' : 'Google' %></button>
-            <% } %>
-            <button class="btn ghost small danger" id="avatar-clear">Supprimer</button>
-          </div>
-        </div>
-
-        <h3>Bannière <span class="hint-inline">(optionnelle)</span></h3>
-        <div class="row">
-          <div class="thumb wide" id="thumb-banner" style="background-image:url('<%= profile.banner || '' %>')"></div>
-          <div class="col">
-            <label class="btn ghost small">
-              Changer
-              <input type="file" accept="image/*" data-upload="banner" hidden />
-            </label>
-            <% if (user.provider === 'discord' || user.provider === 'google') { %>
-            <button class="btn ghost small" id="banner-from-provider">Bannière <%= user.provider === 'discord' ? 'Discord' : 'Google' %></button>
-            <% } %>
-            <button class="btn ghost small danger" id="banner-clear">Supprimer</button>
-          </div>
-        </div>
-
-        <h3>Bio</h3>
-        <textarea
-          id="f-bio"
-          maxlength="500"
-          placeholder="Présente-toi en quelques mots..."
-        ><%= profile.bio %></textarea>
-        <label class="toggle" style="margin-top:8px">
-          <input type="checkbox" id="f-bio_widget" <%= profile.bio_widget ? 'checked' : '' %> />
-          <span>Afficher la bio en widget (avec bordure)</span>
-        </label>
-
-        <h3>Splash screen</h3>
-        <label class="toggle">
-          <input type="checkbox" id="f-splash_enabled" <%= profile.splash_enabled ? 'checked' : '' %> />
-          <span>Afficher l'écran "click to enter"</span>
-        </label>
-        <input type="text" id="f-splash_text" maxlength="60" value="<%= profile.splash_text %>" placeholder="click to enter" />
-      </section>
-
-      <section class="tab-panel" data-panel="design">
-        <h3>Background</h3>
-        <div class="seg" data-seg="bg_type" data-value="<%= profile.bg_type %>">
-          <button data-val="color">Couleur</button>
-          <button data-val="gradient">Gradient</button>
-          <button data-val="image">Image / Vidéo</button>
-        </div>
-
-        <div class="bg-options">
-          <div data-bg="color">
-            <label>Couleur de fond</label>
-            <input type="color" id="bg-color" value="<%= profile.bg_type === 'color' && profile.bg_value ? profile.bg_value : '#0b0a14' %>" />
-          </div>
-          <div data-bg="gradient">
-            <div class="grad-presets" id="grad-presets">
-              <button style="background: linear-gradient(135deg,#7c5cff,#00d4ff)" data-val="linear-gradient(135deg,#7c5cff,#00d4ff)"></button>
-              <button style="background: linear-gradient(135deg,#ff6cab,#7366ff)" data-val="linear-gradient(135deg,#ff6cab,#7366ff)"></button>
-              <button style="background: linear-gradient(135deg,#ff9a44,#ff2d75)" data-val="linear-gradient(135deg,#ff9a44,#ff2d75)"></button>
-              <button style="background: linear-gradient(135deg,#0f2027,#2c5364)" data-val="linear-gradient(135deg,#0f2027,#2c5364)"></button>
-              <button style="background: linear-gradient(135deg,#000000,#1a1a2e)" data-val="linear-gradient(135deg,#000000,#1a1a2e)"></button>
-              <button style="background: linear-gradient(135deg,#11998e,#38ef7d)" data-val="linear-gradient(135deg,#11998e,#38ef7d)"></button>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-              <label style="font-size:0.8rem;color:var(--fg-2)">Couleur 1</label>
-              <input type="color" id="grad-c1" value="#7c5cff" />
-              <label style="font-size:0.8rem;color:var(--fg-2)">Couleur 2</label>
-              <input type="color" id="grad-c2" value="#00d4ff" />
-              <select id="grad-dir" style="flex:1">
-                <option value="135deg">Diagonale ↘</option>
-                <option value="90deg">Vertical ↓</option>
-                <option value="180deg">Horizontal →</option>
-                <option value="45deg">Diagonale ↗</option>
-              </select>
-            </div>
-          </div>
-          <div data-bg="image">
-            <input type="text" id="bg-image-url" placeholder="https://... (image ou vidéo .mp4)" value="<%= profile.bg_type === 'image' ? profile.bg_value : '' %>" />
-            <small class="hint">Tu peux coller une URL ou uploader un fichier ci-dessous.</small>
-            <div class="bg-upload-row">
-              <label class="btn ghost small" id="bg-upload-label">
-                <span id="bg-upload-txt">Uploader image / gif / vidéo (max 98 Mo)</span>
-                <input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" data-upload="bg" hidden />
-              </label>
-              <div class="upload-progress" id="bg-upload-progress" style="display:none">
-                <div class="progress-bar"><div class="progress-fill" id="bg-progress-fill"></div></div>
-                <span id="bg-progress-pct">0%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <h3>Couleurs</h3>
-        <div class="row gap">
-          <label class="col">
-            <span>Accent</span>
-            <input type="color" id="f-accent_color" value="<%= profile.accent_color %>" />
-          </label>
-          <label class="col">
-            <span>Texte</span>
-            <input type="color" id="f-text_color" value="<%= profile.text_color %>" />
-          </label>
-        </div>
-
-        <h3>Police</h3>
-        <select id="f-font">
-          <% ['Inter','Geist','Space Grotesk','JetBrains Mono','Outfit','Poppins'].forEach(function(f){ %>
-            <option value="<%= f %>" <%= profile.font === f ? 'selected' : '' %>><%= f %></option>
-          <% }); %>
-        </select>
-      </section>
-
-      <section class="tab-panel" data-panel="music">
-        <h3>Musique de fond</h3>
-        <p class="hint">Previews 30s via <strong>Deezer</strong><% if (youtubeEnabled) { %> + <strong>YouTube</strong><% } %> — légal et gratuit.</p>
-
-        <div class="music-current" id="music-current">
-          <% if (profile.music_track && profile.music_track.title) { %>
-            <img src="<%= profile.music_track.cover || '' %>" alt="" />
-            <div>
-              <strong><%= profile.music_track.title %></strong>
-              <span><%= profile.music_track.artist %></span>
-            </div>
-            <button class="icon-btn" id="music-remove" title="Retirer">×</button>
-          <% } else { %>
-            <em class="muted">Aucune musique</em>
-          <% } %>
-        </div>
-
-        <input type="search" id="music-q" placeholder="Cherche un titre ou un artiste..." />
-        <ul class="music-results" id="music-results"></ul>
-
-        <h3>Lecture</h3>
-        <label class="toggle">
-          <input type="checkbox" id="f-music_autoplay" <%= profile.music_autoplay ? 'checked' : '' %> />
-          <span>Démarrer automatiquement (après le clic d'entrée)</span>
-        </label>
-        <label class="range">
-          <span>Volume <em id="vol-val"><%= profile.music_volume %></em>%</span>
-          <input type="range" min="0" max="100" id="f-music_volume" value="<%= profile.music_volume %>" />
-        </label>
-      </section>
-
-      <section class="tab-panel" data-panel="links">
-        <h3>Réseaux sociaux</h3>
-        <div class="social-grid" id="social-grid"></div>
-        <button class="btn ghost small" id="add-social">+ Ajouter un réseau</button>
-
-        <h3>Liens personnalisés</h3>
-        <ul class="custom-list" id="custom-list"></ul>
-        <button class="btn ghost small" id="add-custom">+ Ajouter un lien</button>
-      </section>
-
-      <section class="tab-panel" data-panel="effects">
-        <h3>Effet du pseudo</h3>
-        <select id="f-username_effect">
-          <option value="none">Aucun</option>
-          <option value="glow">Glow</option>
-          <option value="shimmer">Shimmer</option>
-          <option value="rainbow">Rainbow</option>
-          <option value="glitch">Glitch</option>
-        </select>
-
-        <h3>Effet du curseur</h3>
-        <select id="f-cursor_effect">
-          <option value="none">Aucun</option>
-          <option value="trail">Trail (traîne)</option>
-          <option value="sparkle">Sparkle (étincelles)</option>
-          <option value="glow">Glow (halo)</option>
-        </select>
-
-        <h3>Particules</h3>
-        <select id="f-particles">
-          <option value="none">Aucune</option>
-          <option value="stars">Étoiles</option>
-          <option value="snow">Neige</option>
-          <option value="bubbles">Bulles</option>
-          <option value="matrix">Matrix</option>
-        </select>
-      </section>
-    </aside>
-
-    <section class="editor-preview">
-      <div class="device">
-        <iframe id="preview-frame" src="/<%= user.username %>?preview=1" title="Aperçu"></iframe>
-      </div>
-    </section>
-  </main>
-
-  <div class="save-bar" id="save-bar">
-    <span class="save-bar-msg">Tu as des modifications non sauvegardées</span>
-    <div class="save-bar-actions">
-      <button class="btn ghost" id="save-abort">Annuler</button>
-      <button class="btn primary" id="save-confirm">Sauvegarder</button>
-    </div>
-  </div>
-
-  <script>
-    window.__INITIAL_PROFILE__ = <%- safeJSON(profile) %>;
-    window.__USERNAME__ = <%- safeJSON(user.username) %>;
-    window.__USER_AVATAR__ = <%- safeJSON(user.avatar_url || null) %>;
-    window.__USER_PROVIDER__ = <%- safeJSON(user.provider) %>;
-  </script>
-  <script src="/static/js/editor.js" defer></script>
+    <script src="/static/js/editor.js"></script>
 </body>
 </html>

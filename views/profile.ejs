@@ -1,150 +1,138 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <%- include('partials/head') %>
-  <link rel="stylesheet" href="/static/css/profile.css" />
-  <style>
-    :root {
-      --accent: <%= profile.accent_color %>;
-      --text: <%= profile.text_color %>;
-      --font: '<%= profile.font %>', system-ui, sans-serif;
-    }
-    body {
-      <% if (profile.bg_type === 'color') { %>
-        background: <%= profile.bg_value || '#0b0a14' %>;
-      <% } else if (profile.bg_type === 'gradient') { %>
-        background: <%= profile.bg_value || 'linear-gradient(135deg,#0b0a14,#1a1a2e)' %>;
-      <% } %>
-    }
-  </style>
-</head>
-<body class="profile-body fx-particles-<%= profile.particles %> fx-cursor-<%= profile.cursor_effect %>">
+<%- include('partials/head', { title: (cfg.displayName || '@' + owner.username) + ' · link2me' }) %>
+<%
+  const fontFamily = cfg.font || 'Inter';
+  const theme = cfg.theme || 'dark';
+  const effect = cfg.particles || cfg.usernameEffect || 'none';
+  const accentColor = cfg.accentColor || '#e94560';
+  const socialLinks = cfg.social_links || [];
+  const customLinks = cfg.custom_links || [];
+  const music = cfg.music;
+  const userBadges = typeof badges !== 'undefined' ? badges : [];
+%>
+<style>
+  body { font-family: '<%= fontFamily %>', sans-serif; }
+  :root {
+    --primary: <%= accentColor %>;
+    --primary-rgb: <%= parseInt(accentColor.slice(1,3), 16) || 233 %>, <%= parseInt(accentColor.slice(3,5), 16) || 69 %>, <%= parseInt(accentColor.slice(5,7), 16) || 96 %>;
+  }
+</style>
+<link rel="stylesheet" href="/static/css/profile.css">
+<body class="profile-page theme-<%= theme %> effect-<%= effect %>" data-profile="<%= owner.username %>" data-owner-id="<%= owner.id %>">
 
-  <% if (profile.bg_type === 'image' && profile.bg_value) { %>
-    <% if (/\.(mp4|webm|mov)$/i.test(profile.bg_value)) { %>
-      <video class="bg-media" autoplay muted loop playsinline poster="">
-        <source src="<%= profile.bg_value %>" />
-      </video>
-    <% } else { %>
-      <img class="bg-media" src="<%= profile.bg_value %>" alt="" />
-    <% } %>
-    <div class="bg-overlay"></div>
+  <% if (effect && effect !== 'none') { %>
+  <canvas id="effectsCanvas" class="effects-canvas"></canvas>
   <% } %>
 
-  <canvas id="particles-canvas" aria-hidden="true"></canvas>
-  <div class="cursor-fx" aria-hidden="true"></div>
-
-  <% if (profile.splash_enabled) { %>
-    <div class="splash" id="splash">
-      <div class="splash-inner">
-        <div class="splash-avatar" style="background-image:url('<%= profile.avatar || '' %>')"></div>
-        <div class="splash-name fx-username-<%= profile.username_effect %>" data-text="@<%= user.username %>">@<%= user.username %></div>
-        <div class="splash-cta"><%= profile.splash_text || 'click to enter' %></div>
-      </div>
-    </div>
+  <% if (cfg.usernameEffect === 'glitch') { %>
+  <div class="glitch-overlay"></div>
   <% } %>
 
-  <main class="profile" id="profile" <%= profile.splash_enabled ? 'hidden' : '' %>>
-    <% if (profile.banner) { %>
-      <div class="banner" style="background-image:url('<%= profile.banner %>')"></div>
-    <% } %>
-
-    <div class="avatar-wrap">
-      <div class="avatar-ring"></div>
-      <div class="avatar" style="background-image:url('<%= profile.avatar || user.avatar_url || '' %>')"></div>
-    </div>
-
-    <h1 class="name fx-username-<%= profile.username_effect %>" data-text="@<%= user.username %>">@<%= user.username %></h1>
-
-    <% if (profile.bio) { %>
-      <% if (profile.bio_widget) { %>
-        <div class="bio-widget">
-          <div class="bio-widget-title">À propos</div>
-          <p class="bio"><%= profile.bio %></p>
+  <div class="profile-container">
+    <!-- Avatar Section -->
+    <div class="profile-header">
+      <div class="profile-avatar-wrapper <%= cfg.bgType === 'gradient' ? 'gradient-border' : '' %>">
+        <img
+          src="<%= cfg.avatarUrl || 'https://github.com/' + owner.username + '.png?size=200' %>"
+          alt="<%= cfg.displayName || owner.username %>"
+          class="profile-avatar"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+        >
+        <div class="profile-avatar-fallback" style="display:none;">
+          <span><%= (cfg.displayName || owner.username || '?')[0].toUpperCase() %></span>
         </div>
-      <% } else { %>
-        <p class="bio"><%= profile.bio %></p>
-      <% } %>
-    <% } %>
-
-    <% var socials = profile.social_links || []; %>
-    <% if (socials.length) { %>
-      <ul class="socials">
-        <% socials.forEach(function(s) { %>
-          <li>
-            <a class="social social-<%= s.platform %>"
-               href="<%= SocialLinks.url(s.platform, s.value) %>"
-               target="_blank" rel="noopener noreferrer"
-               aria-label="<%= s.platform %>">
-              <%- SocialLinks.icon(s.platform) %>
-            </a>
-          </li>
-        <% }); %>
-      </ul>
-    <% } %>
-
-    <% var customs = profile.custom_links || []; %>
-    <% if (customs.length) { %>
-      <ul class="custom-links">
-        <% customs.forEach(function(c) { %>
-          <li><a class="custom-link" href="<%= c.url %>" target="_blank" rel="noopener noreferrer"><%= c.label %></a></li>
-        <% }); %>
-      </ul>
-    <% } %>
-
-    <div class="footer-meta">
-      <span class="views"><strong><%= (profile.views || 0).toLocaleString('fr-FR') %></strong> vues</span>
-      <a class="brand-tiny" href="/">link2me</a>
-    </div>
-  </main>
-
-  <% if (profile.music_track && profile.music_track.preview) { %>
-    <% const ytMatch = (profile.music_track.preview || '').match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/); %>
-    <% const ytId = ytMatch ? ytMatch[1] : null; %>
-    <% if (ytId) { %>
-      <div class="player player-yt" id="player">
-        <iframe
-          id="yt-iframe"
-          src=""
-          data-src="https://www.youtube-nocookie.com/embed/<%= ytId %>?controls=1&rel=0<% if (profile.music_autoplay) { %>&autoplay=1<% } %>"
-          allow="autoplay; encrypted-media"
-          allowfullscreen
-          loading="lazy"
-          style="border:0;display:block"></iframe>
-        <div class="player-info" style="padding:8px 12px">
-          <strong><%= profile.music_track.title %></strong>
-          <span><%= profile.music_track.artist %></span>
+        <% if (userBadges.length) { %>
+        <div class="profile-badges">
+          <% userBadges.forEach(function(badge) { %>
+          <span class="profile-badge" title="<%= badge.name %>">
+            <i class="fa-solid <%= badge.icon || 'fa-star' %>"></i>
+          </span>
+          <% }); %>
         </div>
+        <% } %>
       </div>
-    <% } else { %>
-      <div class="player" id="player">
-        <img class="player-cover" src="<%= profile.music_track.cover || '' %>" alt="" />
-        <div class="player-info">
-          <strong><%= profile.music_track.title %></strong>
-          <span><%= profile.music_track.artist %></span>
+
+      <h1 class="profile-name <%= cfg.usernameEffect === 'glitch' ? 'glitch-text' : '' %>" <%= cfg.usernameEffect === 'glitch' ? 'data-text="' + (cfg.displayName || owner.username) + '"' : '' %>>
+        <%= cfg.displayName || ('@' + owner.username) %>
+      </h1>
+
+      <% if (cfg.bio) { %>
+      <p class="profile-bio"><%= cfg.bio %></p>
+      <% } %>
+
+      <% if (cfg.location) { %>
+      <span class="profile-location">
+        <i class="fa-solid fa-location-dot"></i> <%= cfg.location %>
+      </span>
+      <% } %>
+    </div>
+
+    <!-- Socials -->
+    <% if (socialLinks.length) { %>
+    <div class="profile-socials">
+      <% socialLinks.forEach(function(link) {
+        const resolved = SocialLinks.url(link.platform, link.value);
+        if (resolved && resolved !== '#') { %>
+      <a href="<%= resolved %>" target="_blank" rel="noopener" class="profile-social-link" title="<%= link.platform %>">
+        <%- SocialLinks.icon(link.platform) %>
+      </a>
+      <% } }); %>
+    </div>
+    <% } %>
+
+    <!-- Custom Links -->
+    <% if (customLinks.length) { %>
+    <div class="profile-links">
+      <% customLinks.forEach(function(link) { %>
+      <a href="<%= link.url %>" target="_blank" rel="noopener" class="profile-link <%= cfg.bgType === 'gradient' ? 'gradient-border-link' : '' %>" data-link-id="<%= link.url %>">
+        <% if (link.icon) { %><i class="fa-solid <%= link.icon %> profile-link-icon" style="color:<%= link.color || accentColor %>"></i><% } %>
+        <span class="profile-link-title"><%= link.label %></span>
+        <i class="fa-solid fa-arrow-right profile-link-arrow"></i>
+      </a>
+      <% }); %>
+    </div>
+    <% } %>
+
+    <!-- Music Player -->
+    <% if (music) { %>
+    <div class="profile-music">
+      <h3 class="profile-section-title">
+        <i class="fa-solid fa-music"></i>
+        Musique
+      </h3>
+      <div class="profile-music-track">
+        <img src="<%= music.cover || '' %>" alt="<%= music.title %>" class="profile-music-cover" onerror="this.style.display='none'">
+        <div class="profile-music-info">
+          <span class="profile-music-title"><%= music.title %></span>
+          <span class="profile-music-artist"><%= music.artist %></span>
         </div>
-        <button class="player-btn" id="player-toggle" aria-label="Lecture/pause">
-          <svg id="ic-play" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
-          <svg id="ic-pause" viewBox="0 0 24 24" width="18" height="18" style="display:none"><path fill="currentColor" d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        <% if (music.preview) { %>
+        <button class="profile-music-play" onclick="new Audio('<%= music.preview %>').play()">
+          <i class="fa-solid fa-play"></i>
         </button>
-        <audio id="audio" preload="none">
-          <source src="<%= profile.music_track.preview %>" type="audio/mpeg" />
-        </audio>
+        <% } %>
       </div>
+    </div>
     <% } %>
+
+    <!-- Footer -->
+    <div class="profile-footer">
+      <a href="/" class="profile-powered">
+        <i class="fa-solid fa-gun"></i>
+        Powered by link2me
+      </a>
+      <% if (isOwner) { %>
+      <a href="/editor" class="profile-edit-link">
+        <i class="fa-solid fa-pen-to-square"></i> Éditer
+      </a>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (cfg.cursorEffect && cfg.cursorEffect !== 'none') { %>
+  <div class="custom-cursor cursor-<%= cfg.cursorEffect %>" id="customCursor"></div>
   <% } %>
 
-  <script>
-    window.__PROFILE__ = {
-      particles: <%- safeJSON(profile.particles) %>,
-      cursor: <%- safeJSON(profile.cursor_effect) %>,
-      accent: <%- safeJSON(profile.accent_color) %>,
-      splash: <%= profile.splash_enabled ? 'true' : 'false' %>,
-      autoplay: <%= profile.music_autoplay ? 'true' : 'false' %>,
-      volume: <%= profile.music_volume %>
-    };
-  </script>
-  <script src="/static/js/effects.js" defer></script>
-  <script src="/static/js/profile.js" defer></script>
+  <script src="/static/js/effects.js"></script>
+  <script src="/static/js/profile.js"></script>
 </body>
 </html>

@@ -1,74 +1,107 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <%- include('../partials/head') %>
-  <style>
-    .admin-table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; font-size: 0.84rem; }
-    .admin-table th { text-align: left; padding: 8px 12px; color: var(--fg-2); font-weight: 600; border-bottom: 1px solid var(--line); }
-    .admin-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-    .admin-table tr:hover td { background: var(--card-hover); }
-    .badge-admin { background: rgba(255,187,51,0.15); color: #ffbb33; border: 1px solid rgba(255,187,51,0.3); padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; }
-    .badge-blocked { background: rgba(255,108,171,0.15); color: #fda4b1; border: 1px solid rgba(255,108,171,0.3); padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; }
-    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-2); background-size: cover; background-position: center; flex-shrink: 0; }
-    .search-bar { display: flex; gap: 10px; margin-bottom: 1.5rem; }
-    .search-bar input { flex: 1; }
-    .pagination { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 1rem; }
-  </style>
-</head>
-<body class="page-dashboard">
-  <div class="aurora dim" aria-hidden="true"><span></span><span></span><span></span></div>
-  <%- include('../partials/nav') %>
-  <main class="dash">
-    <header class="dash-head">
-      <h1 class="display small">Utilisateurs <span class="muted" style="font-size:1rem;font-weight:400">(<%= total %>)</span></h1>
-      <a class="btn ghost" href="/admin">← Admin</a>
-    </header>
-    <form class="search-bar" method="GET" action="/admin/users">
-      <input type="search" name="q" value="<%= search %>" placeholder="Chercher par pseudo, email, nom…" />
-      <button class="btn" type="submit">Chercher</button>
-    </form>
-    <div class="card" style="overflow-x:auto;padding:0">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Pseudo</th>
-            <th>Email</th>
-            <th>Provider</th>
-            <th>IP</th>
-            <th>Vues</th>
-            <th>Inscrit</th>
-            <th>Statut</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <% users.forEach(function(u) { %>
-          <tr>
-            <td><div class="user-avatar" style="<%= u.avatar_url ? 'background-image:url(' + u.avatar_url + ')' : '' %>"></div></td>
-            <td><a class="link" href="/admin/users/<%= u.id %>">@<%= u.username || '—' %></a></td>
-            <td style="color:var(--fg-2)"><%= u.email || '—' %></td>
-            <td style="color:var(--fg-2)"><%= u.provider %></td>
-            <td style="color:var(--fg-2);font-size:0.75rem"><%= u.last_ip || '—' %></td>
-            <td style="color:var(--fg-2)"><%= ((profileMap[u.id]||{}).views||0).toLocaleString('fr-FR') %></td>
-            <td style="color:var(--fg-2)"><%= new Date(u.created_at).toLocaleDateString('fr-FR') %></td>
-            <td>
-              <% if (u.is_admin) { %><span class="badge-admin">Admin</span> <% } %>
-              <% if (u.blocked) { %><span class="badge-blocked">Bloqué</span><% } %>
-            </td>
-            <td><a class="btn ghost small" href="/admin/users/<%= u.id %>">Voir</a></td>
-          </tr>
-          <% }); %>
-        </tbody>
-      </table>
+<%- include('../partials/head', { title: 'Admin — Utilisateurs' }) %>
+<body class="admin-page">
+    <%- include('../partials/nav', { user: user, currentPage: 'admin' }) %>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <a href="/admin" class="admin-back">
+                <i class="fa-solid fa-arrow-left"></i> Retour
+            </a>
+            <h1><i class="fa-solid fa-users"></i> Utilisateurs</h1>
+            <p>Gère tous les utilisateurs de la plateforme.</p>
+        </div>
+
+        <div class="admin-users-search">
+            <input type="text" id="userSearch" placeholder="Rechercher un utilisateur..." class="admin-search-input">
+        </div>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>GitHub ID</th>
+                        <th>Rôle</th>
+                        <th>Statut</th>
+                        <th>Profil</th>
+                        <th>Vues</th>
+                        <th>Inscrit le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <% if (users?.length) { %>
+                        <% users.forEach(function(u) { %>
+                        <tr data-username="<%= u.username %>" data-github="<%= u.githubId %>">
+                            <td class="admin-user-cell">
+                                <img src="<%= u.avatar || 'https://github.com/' + u.username + '.png?size=40' %>" alt="<%= u.username %>" class="admin-user-avatar" onerror="this.style.display='none'">
+                                <div>
+                                    <strong><%= u.displayName || u.username %></strong>
+                                    <small>@<%= u.username %></small>
+                                </div>
+                            </td>
+                            <td><code><%= u.githubId %></code></td>
+                            <td>
+                                <span class="admin-role-badge role-<%= u.role %>">
+                                    <%= u.role || 'user' %>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="admin-status-badge status-<%= u.blocked ? 'blocked' : 'active' %>">
+                                    <%= u.blocked ? 'Bloqué' : 'Actif' %>
+                                </span>
+                            </td>
+                            <td>
+                                <% if (u.profileId) { %>✅<% } else { %>
+                                <span class="muted">—</span>
+                                <% } %>
+                            </td>
+                            <td><%= u.stats?.totalViews || 0 %></td>
+                            <td><%= new Date(u.createdAt).toLocaleDateString('fr-FR') %></td>
+                            <td class="admin-actions-cell">
+                                <a href="/admin/users/<%= u._id || u.id %>" class="btn btn-small btn-ghost">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <% if (!u.blocked) { %>
+                                <form action="/admin/users/<%= u._id || u.id %>/block" method="POST" style="display:inline">
+                                    <button type="submit" class="btn btn-small btn-warning" onclick="return confirm('Bloquer <%= u.username %> ?')">
+                                        <i class="fa-solid fa-ban"></i>
+                                    </button>
+                                </form>
+                                <% } else { %>
+                                <form action="/admin/users/<%= u._id || u.id %>/unblock" method="POST" style="display:inline">
+                                    <button type="submit" class="btn btn-small btn-success">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </form>
+                                <% } %>
+                                <form action="/admin/users/<%= u._id || u.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('SUPPRIMER <%= u.username %> ? IRRÉVERSIBLE !')">
+                                    <button type="submit" class="btn btn-small btn-danger">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="8" class="admin-empty">Aucun utilisateur trouvé.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <% if (pages > 1) { %>
-    <div class="pagination">
-      <% if (page > 1) { %><a class="btn ghost small" href="/admin/users?page=<%= page-1 %>&q=<%= search %>">←</a><% } %>
-      <span style="color:var(--fg-2);font-size:0.85rem">Page <%= page %> / <%= pages %></span>
-      <% if (page < pages) { %><a class="btn ghost small" href="/admin/users?page=<%= page+1 %>&q=<%= search %>">→</a><% } %>
-    </div>
-    <% } %>
-  </main>
+
+    <script>
+    document.getElementById('userSearch')?.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        document.querySelectorAll('#usersTableBody tr').forEach(row => {
+            const username = (row.dataset.username || '').toLowerCase();
+            const github = (row.dataset.github || '').toLowerCase();
+            row.style.display = (!query || username.includes(query) || github.includes(query)) ? '' : 'none';
+        });
+    });
+    </script>
 </body>
 </html>

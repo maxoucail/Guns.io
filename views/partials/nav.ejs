@@ -1,21 +1,66 @@
-<nav class="nav">
-  <a href="/" class="brand">
-    <span class="brand-mark"></span>
-    <span class="brand-name">link2me</span>
-  </a>
-  <div class="nav-actions">
-    <% if (typeof user !== 'undefined' && user) { %>
-      <% if (user.username) { %>
-        <a class="btn ghost" href="/<%= user.username %>" target="_blank" rel="noopener">Voir mon profil</a>
-        <a class="btn" href="/dashboard">Dashboard</a>
-        <% if (user.is_admin) { %><a class="btn ghost" href="/admin" style="color:#ffbb33">Admin</a><% } %>
-      <% } else { %>
-        <a class="btn" href="/welcome">Choisir un pseudo</a>
-      <% } %>
-      <a class="btn ghost" href="/logout">Déco</a>
-    <% } else { %>
-      <a class="btn ghost" href="/login">Connexion</a>
-      <a class="btn" href="/login">Créer ma page</a>
-    <% } %>
-  </div>
+<nav class="navbar" id="navbar">
+    <div class="nav-container">
+        <a href="/" class="nav-logo">
+            <i class="fa-solid fa-gun"></i>
+            <span>Guns.io</span>
+        </a>
+        
+        <div class="nav-links" id="navLinks">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <a href="/dashboard" class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
+                    <i class="fa-solid fa-table-columns"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/editor" class="nav-link <%= currentPage === 'editor' ? 'active' : '' %>">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Éditeur</span>
+                </a>
+                <a href="/<%= user.username %>" class="nav-link nav-link-profile">
+                    <img src="<%= user.avatar || 'https://github.com/' + user.username + '.png?size=40' %>" alt="<%= user.username %>" class="nav-avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <span class="nav-avatar-fallback" style="display:none;"><%= (user.displayName || user.username)[0].toUpperCase() %></span>
+                    <span><%= user.displayName || user.username %></span>
+                </a>
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin" class="nav-link nav-link-admin">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Admin</span>
+                    </a>
+                <% } %>
+                <a href="/logout" class="nav-link nav-link-logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            <% } else { %>
+                <a href="/auth/github" class="nav-link nav-link-login">
+                    <i class="fa-brands fa-github"></i>
+                    <span>Connexion</span>
+                </a>
+            <% } %>
+        </div>
+        
+        <button class="nav-toggle" id="navToggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
 </nav>
+
+<script>
+document.getElementById('navToggle')?.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('open');
+    document.getElementById('navToggle').classList.toggle('active');
+});
+
+// Scroll effect
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > 100) {
+        nav.classList.add('scrolled');
+    } else {
+        nav.classList.remove('scrolled');
+    }
+    lastScroll = currentScroll;
+});
+</script>

@@ -1,15 +1,28 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <%- include('partials/head') %>
-</head>
-<body class="page-auth">
-  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
-  <div class="grain" aria-hidden="true"></div>
-  <main class="auth-shell">
-    <h1 class="display"><span class="gradient-text">404</span></h1>
-    <p class="lead">On a cherché. Y'a rien ici.</p>
-    <a class="btn big" href="/">Retour à l'accueil</a>
-  </main>
+<%- include('partials/head', { title: 'Page introuvable' }) %>
+<body class="error-page">
+    <div class="error-container">
+        <div class="error-code">
+            <span class="error-digit">4</span>
+            <span class="error-zero">
+                <i class="fa-solid fa-gun error-zero-icon"></i>
+            </span>
+            <span class="error-digit">4</span>
+        </div>
+        <h1 class="error-title">Page introuvable</h1>
+        <p class="error-desc">La page que tu cherches n'existe pas ou a été déplacée. Mais pas de panique, tu peux toujours créer ton profil !</p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">
+                <i class="fa-solid fa-house"></i>
+                Retour à l'accueil
+            </a>
+            <a href="/auth/github" class="btn btn-ghost">
+                <i class="fa-brands fa-github"></i>
+                Créer un profil
+            </a>
+        </div>
+    </div>
+    <div class="error-bg">
+        <div class="error-bg-grid"></div>
+    </div>
 </body>
 </html>

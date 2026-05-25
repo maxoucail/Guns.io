@@ -1,39 +1,53 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <%- include('../partials/head') %>
-  <style>
-    .admin-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 16px; margin-bottom: 2rem; }
-    .stat-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; text-align: center; }
-    .stat-card .n { font-size: 2.4rem; font-weight: 800; color: var(--accent); }
-    .stat-card .l { font-size: 0.82rem; color: var(--fg-2); margin-top: 4px; }
-    .admin-nav { display: flex; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; }
-    .impersonate-bar { background: rgba(255,108,171,0.15); border: 1px solid rgba(255,108,171,0.3); padding: 10px 20px; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.88rem; display: flex; align-items: center; gap: 12px; }
-  </style>
-</head>
-<body class="page-dashboard">
-  <div class="aurora dim" aria-hidden="true"><span></span><span></span><span></span></div>
-  <%- include('../partials/nav') %>
-  <main class="dash">
-    <% if (req.session && req.session.impersonating) { %>
-    <div class="impersonate-bar">
-      ⚠️ Tu usurpes un compte. <a href="/admin/stop-impersonate" class="btn ghost small">Revenir à ton compte admin</a>
+<%- include('../partials/head', { title: 'Admin' }) %>
+<body class="admin-page">
+    <%- include('../partials/nav', { user: user, currentPage: 'admin' }) %>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1><i class="fa-solid fa-shield-halved"></i> Administration</h1>
+            <p>Gère les utilisateurs, les badges, et les paramètres du site.</p>
+        </div>
+
+        <div class="admin-stats">
+            <div class="admin-stat-card">
+                <i class="fa-solid fa-users"></i>
+                <span class="admin-stat-number"><%= stats?.totalUsers || 0 %></span>
+                <span class="admin-stat-label">Utilisateurs</span>
+            </div>
+            <div class="admin-stat-card">
+                <i class="fa-solid fa-user-check"></i>
+                <span class="admin-stat-number"><%= stats?.activeUsers || 0 %></span>
+                <span class="admin-stat-label">Actifs</span>
+            </div>
+            <div class="admin-stat-card">
+                <i class="fa-solid fa-user-slash"></i>
+                <span class="admin-stat-number"><%= stats?.blockedUsers || 0 %></span>
+                <span class="admin-stat-label">Bloqués</span>
+            </div>
+            <div class="admin-stat-card">
+                <i class="fa-solid fa-eye"></i>
+                <span class="admin-stat-number"><%= stats?.totalViews || 0 %></span>
+                <span class="admin-stat-label">Vues totales</span>
+            </div>
+        </div>
+
+        <div class="admin-grid">
+            <a href="/admin/users" class="admin-card">
+                <i class="fa-solid fa-users"></i>
+                <h3>Utilisateurs</h3>
+                <p>Gérer les comptes utilisateurs, bloquer, débloquer, impersonate.</p>
+            </a>
+            <a href="/admin/badges" class="admin-card">
+                <i class="fa-solid fa-award"></i>
+                <h3>Badges</h3>
+                <p>Créer et gérer les badges disponibles sur la plateforme.</p>
+            </a>
+            <a href="/admin/auth" class="admin-card">
+                <i class="fa-solid fa-key"></i>
+                <h3>Authentification</h3>
+                <p>Gérer les paramètres d'authentification administrateur.</p>
+            </a>
+        </div>
     </div>
-    <% } %>
-    <header class="dash-head">
-      <h1 class="display small">Panneau <span class="gradient-text">Admin</span></h1>
-    </header>
-    <nav class="admin-nav">
-      <a class="btn" href="/admin/users">Utilisateurs</a>
-      <a class="btn ghost" href="/admin/badges">Badges</a>
-      <a class="btn ghost" href="/dashboard">Mon dashboard</a>
-    </nav>
-    <div class="admin-grid">
-      <div class="stat-card"><div class="n"><%= stats.users %></div><div class="l">Utilisateurs</div></div>
-      <div class="stat-card"><div class="n"><%= stats.admins %></div><div class="l">Admins</div></div>
-      <div class="stat-card"><div class="n"><%= stats.blocked %></div><div class="l">Bloqués</div></div>
-      <div class="stat-card"><div class="n"><%= stats.views.toLocaleString('fr-FR') %></div><div class="l">Vues totales</div></div>
-    </div>
-  </main>
 </body>
 </html>

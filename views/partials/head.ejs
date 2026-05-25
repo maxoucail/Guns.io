@@ -1,11 +1,43 @@
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<meta name="theme-color" content="#0b0a14" />
-<meta name="description" content="link2me — ta page perso, sublime et 100% gratuite. Tout le premium inclus." />
-<title><%= title %></title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;600;800&family=Poppins:wght@400;600;800&family=Unbounded:wght@400;600;700;800;900&display=swap" />
-<link rel="stylesheet" href="/static/css/main.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="description" content="Guns.io — Crée ton profil unique. Le meilleur créateur de pages de liens, inspiré par gun.lol. Gratuit, stylé, puissant.">
+    <meta name="keywords" content="guns.io, link in bio, page de liens, profil personnalisé, créateur de profil, gun.lol, alternative gun.lol">
+    <meta name="author" content="Guns.io">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="<%= typeof title !== 'undefined' ? title + ' — Guns.io' : 'Guns.io — Crée ton profil ultime' %>">
+    <meta property="og:description" content="Le meilleur créateur de pages de liens. Effets visuels, polices, badges, et bien plus.">
+    <meta property="og:image" content="/img/og-image.png">
+    <meta property="og:url" content="https://guns.io">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Guns.io">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Guns.io — Crée ton profil ultime">
+    <meta name="twitter:description" content="Le meilleur créateur de pages de liens. Effets visuels, polices, badges, et bien plus.">
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://i.scdn.co">
+    <link rel="preconnect" href="https://api.deezer.com">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    
+    <%- typeof extraStyles !== 'undefined' ? extraStyles : '' %>
+    
+    <title><%= typeof title !== 'undefined' ? title + ' — Guns.io' : 'Guns.io — Crée ton profil ultime' %></title>
+</head>

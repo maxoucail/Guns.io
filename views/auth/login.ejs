@@ -1,0 +1,59 @@
+<%- include('../partials/head', { title: 'Connexion' }) %>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="/" class="auth-logo">
+                    <i class="fa-solid fa-gun"></i>
+                    <span>Guns.io</span>
+                </a>
+                <h1>Connecte-toi</h1>
+                <p>Choisis une méthode de connexion pour accéder à ton compte.</p>
+            </div>
+            
+            <div class="auth-providers">
+                <a href="/auth/github" class="auth-provider auth-provider-github">
+                    <i class="fa-brands fa-github"></i>
+                    <div class="auth-provider-info">
+                        <span class="auth-provider-name">GitHub</span>
+                        <span class="auth-provider-desc">Connexion rapide avec ton compte GitHub</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right auth-provider-arrow"></i>
+                </a>
+                
+                <a href="/auth/google" class="auth-provider auth-provider-google">
+                    <i class="fa-brands fa-google"></i>
+                    <div class="auth-provider-info">
+                        <span class="auth-provider-name">Google</span>
+                        <span class="auth-provider-desc">Utilise ton compte Google</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right auth-provider-arrow"></i>
+                </a>
+                
+                <a href="/auth/discord" class="auth-provider auth-provider-discord">
+                    <i class="fa-brands fa-discord"></i>
+                    <div class="auth-provider-info">
+                        <span class="auth-provider-name">Discord</span>
+                        <span class="auth-provider-desc">Connecte-toi avec Discord</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right auth-provider-arrow"></i>
+                </a>
+            </div>
+            
+            <div class="auth-footer">
+                <p>En te connectant, tu acceptes nos <a href="/legal#terms">conditions d'utilisation</a>.</p>
+                <p class="auth-note">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Pas de mot de passe, tout passe par OAuth. Tes données sont protégées.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-bg">
+        <div class="auth-bg-grid"></div>
+        <div class="auth-bg-glow auth-bg-glow-1"></div>
+        <div class="auth-bg-glow auth-bg-glow-2"></div>
+    </div>
+</body>
+</html>

@@ -1,56 +1,153 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <%- include('partials/head') %>
-</head>
-<body class="page-dashboard">
-  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
-  <div class="grain" aria-hidden="true"></div>
+<%- include('partials/head', { title: 'Dashboard' }) %>
+<body class="dashboard-page">
+    <%- include('partials/nav', { user: user, currentPage: 'dashboard' }) %>
 
-  <%- include('partials/nav') %>
+    <div class="dashboard-container">
+        <!-- Welcome Section -->
+        <div class="dashboard-welcome">
+            <div class="dashboard-welcome-content">
+                <h1>Salut, <%= pageConfig.displayName || user.username %> 👋</h1>
+                <p>Bienvenue sur ton dashboard. Voici un aperçu de ton activité.</p>
+            </div>
+            <div class="dashboard-welcome-actions">
+                <a href="/editor" class="btn btn-primary">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Éditer mon profil
+                </a>
+                <a href="/<%= user.username %>" class="btn btn-ghost" target="_blank">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    Voir mon profil
+                </a>
+            </div>
+        </div>
 
-  <main class="dash">
-    <header class="dash-head">
-      <div>
-        <h1 class="display small">Salut <span class="gradient-text">@<%= user.username %></span></h1>
-        <p class="lead small">Ton URL : <a class="link" href="/<%= user.username %>" target="_blank" rel="noopener">link2me.fr/<%= user.username %></a></p>
-      </div>
-      <div class="dash-actions">
-        <a class="btn" href="/editor">Personnaliser</a>
-        <a class="btn ghost" href="/<%= user.username %>" target="_blank" rel="noopener">Voir en live</a>
-      </div>
-    </header>
+        <!-- Stats Grid -->
+        <div class="dashboard-stats">
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon">
+                    <i class="fa-solid fa-eye"></i>
+                </div>
+                <div class="dashboard-stat-info">
+                    <span class="dashboard-stat-number"><%= (typeof stats !== 'undefined' ? (stats.totalViews || 0) : 0) %></span>
+                    <span class="dashboard-stat-label">Vues totales</span>
+                </div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon">
+                    <i class="fa-solid fa-arrow-pointer"></i>
+                </div>
+                <div class="dashboard-stat-info">
+                    <span class="dashboard-stat-number"><%= (typeof stats !== 'undefined' ? (stats.totalClicks || 0) : 0) %></span>
+                    <span class="dashboard-stat-label">Clics totaux</span>
+                </div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+                <div class="dashboard-stat-info">
+                    <span class="dashboard-stat-number"><%= pageConfig?.custom_links?.length || 0 %></span>
+                    <span class="dashboard-stat-label">Liens</span>
+                </div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <div class="dashboard-stat-info">
+                    <span class="dashboard-stat-number"><%= typeof badges !== 'undefined' ? badges.length : 0 %></span>
+                    <span class="dashboard-stat-label">Badges</span>
+                </div>
+            </div>
+        </div>
 
-    <div class="dash-grid">
-      <article class="card stat">
-        <span class="stat-label">Vues totales</span>
-        <span class="stat-value"><%= (profile && profile.views || 0).toLocaleString('fr-FR') %></span>
-      </article>
-      <article class="card stat">
-        <span class="stat-label">Liens sociaux</span>
-        <span class="stat-value"><%= (profile && profile.social_links || []).length %></span>
-      </article>
-      <article class="card stat">
-        <span class="stat-label">Liens custom</span>
-        <span class="stat-value"><%= (profile && profile.custom_links || []).length %></span>
-      </article>
-      <article class="card stat">
-        <span class="stat-label">Musique</span>
-        <span class="stat-value mini">
-          <% if (profile && profile.music_track && profile.music_track.title) { %>
-            <%= profile.music_track.title %>
-          <% } else { %>
-            <em class="muted">aucune</em>
-          <% } %>
-        </span>
-      </article>
+        <!-- Quick Info -->
+        <div class="dashboard-grid">
+            <!-- Profile URL -->
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3><i class="fa-solid fa-globe"></i> Ton profil</h3>
+                </div>
+                <div class="dashboard-card-body">
+                    <div class="profile-url-copy">
+                        <span class="profile-url"><%= siteUrl %>/<strong><%= user.username %></strong></span>
+                        <button class="btn btn-small btn-ghost" onclick="navigator.clipboard.writeText('<%= siteUrl %>/<%= user.username %>')">
+                            <i class="fa-solid fa-copy"></i> Copier
+                        </button>
+                    </div>
+                    <div class="dashboard-profile-info">
+                        <span><i class="fa-solid fa-palette"></i> Thème : <strong><%= pageConfig.theme || 'dark' %></strong></span>
+                        <span><i class="fa-solid fa-font"></i> Police : <strong><%= pageConfig.font || 'Inter' %></strong></span>
+                        <span><i class="fa-solid fa-wand-magic-sparkles"></i> Effet : <strong><%= pageConfig.particles || 'Aucun' %></strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3><i class="fa-solid fa-clock"></i> Activité récente</h3>
+                </div>
+                <div class="dashboard-card-body">
+                    <div class="activity-list">
+                        <% if (pageConfig.bio) { %>
+                        <div class="activity-item">
+                            <i class="fa-solid fa-circle"></i>
+                            <span>Profil configuré avec succès</span>
+                            <span class="activity-time">Actif</span>
+                        </div>
+                        <% } %>
+                        <% if (user.lastLoginAt) { %>
+                        <div class="activity-item">
+                            <i class="fa-solid fa-circle"></i>
+                            <span>Dernière connexion</span>
+                            <span class="activity-time"><%= new Date(user.lastLoginAt).toLocaleDateString('fr-FR') %></span>
+                        </div>
+                        <% } %>
+                        <div class="activity-item">
+                            <i class="fa-solid fa-circle"></i>
+                            <span>Compte créé</span>
+                            <span class="activity-time"><%= user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : 'N/A' %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badges -->
+            <% if (typeof badges !== 'undefined' && badges.length) { %>
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h3><i class="fa-solid fa-award"></i> Tes badges</h3>
+                </div>
+                <div class="dashboard-card-body">
+                    <div class="badges-display">
+                        <% badges.forEach(function(badge) { %>
+                        <div class="badge-item" title="<%= badge.name %>">
+                            <i class="fa-solid <%= badge.icon || 'fa-star' %>"></i>
+                            <span><%= badge.name %></span>
+                        </div>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+            <!-- Danger Zone -->
+            <div class="dashboard-card dashboard-card-danger">
+                <div class="dashboard-card-header">
+                    <h3><i class="fa-solid fa-triangle-exclamation"></i> Zone de danger</h3>
+                </div>
+                <div class="dashboard-card-body">
+                    <p>Supprimer ton compte est irréversible. Toutes tes données seront effacées.</p>
+                    <form action="/api/delete-account" method="POST" onsubmit="return confirm('Es-tu sûr de vouloir supprimer ton compte ? Cette action est IRRÉVERSIBLE.')">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fa-solid fa-trash"></i>
+                            Supprimer mon compte
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <section class="card big-card">
-      <h2>Prêt à customiser ?</h2>
-      <p>Ouvre l'éditeur. Tout est en live : tu changes à gauche, tu vois à droite.</p>
-      <a class="btn big" href="/editor">Ouvrir l'éditeur</a>
-    </section>
-  </main>
 </body>
 </html>

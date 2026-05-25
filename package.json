@@ -1,36 +1,37 @@
 {
   "name": "link2me",
   "version": "1.0.0",
-  "description": "Plateforme de bio links premium gratuite - link2me.fr",
-  "main": "src/index.js",
+  "description": "La version de Link2Me par Arionyq",
+  "license": "ISC",
+  "author": "Arionyq",
   "type": "commonjs",
-  "scripts": {
-    "start": "node src/index.js",
-    "start:single": "CLUSTER=false node src/index.js",
-    "dev": "CLUSTER=false NODE_ENV=development node src/index.js",
-    "cluster": "CLUSTER=true node src/index.js",
-    "pm2": "pm2 start ecosystem.config.js",
-    "pm2:stop": "pm2 stop ecosystem.config.js",
-    "pm2:reload": "pm2 reload ecosystem.config.js"
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
   },
-  "engines": {
-    "node": ">=18"
+  "scripts": {
+    "test": "node ."
   },
   "dependencies": {
-    "axios": "^1.7.7",
-    "compression": "^1.7.4",
+    "axios": "^1.16.1",
+    "better-sqlite3": "^12.10.0",
+    "better-sqlite3-session-store": "^0.1.0",
+    "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
-    "dotenv": "^16.4.5",
-    "ejs": "^3.1.10",
-    "express": "^4.21.0",
-    "express-rate-limit": "^7.4.0",
-    "express-session": "^1.18.0",
-    "helmet": "^7.1.0",
-    "multer": "^1.4.5-lts.1",
-    "nanoid": "^3.3.7",
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "express-session": "^1.19.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
+    "multer": "^2.1.1",
+    "nanoid": "^5.1.11",
+    "node-cron": "^4.2.1",
     "passport": "^0.7.0",
     "passport-discord": "^0.1.4",
+    "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
-    "sharp": "^0.33.5"
+    "sharp": "^0.34.5"
   }
 }

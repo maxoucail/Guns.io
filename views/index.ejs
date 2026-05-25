@@ -1,333 +1,293 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <%- include('partials/head') %>
-</head>
-<body class="page-landing">
+<%- include('partials/head', { title: 'Crée ton profil ultime' }) %>
+<body class="landing-page">
+    <%- include('partials/nav', { user: typeof user !== 'undefined' ? user : null, currentPage: 'landing' }) %>
 
-<!-- NAVBAR -->
-<nav class="navbar" id="navbar">
-  <a href="/" class="nav-logo">
-    <img src="/static/img/favicon.svg" alt="link2me" width="32" height="32" />
-    <span class="nav-brand">link2me</span>
-  </a>
-  <button class="nav-toggle" id="navToggle" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="nav-menu" id="navMenu">
-    <a href="#features" class="nav-link">Fonctionnalités</a>
-    <a href="#demo" class="nav-link">Démo</a>
-    <a href="#reviews" class="nav-link">Avis</a>
-    <div class="nav-sep"></div>
-    <% if (locals.user) { %>
-      <a href="/dashboard" class="nav-link" style="display:flex;align-items:center;gap:.5rem;">
-        <img src="<%= user.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user.id || 'user') + '&backgroundColor=0B1020' %>"
-             alt="avatar" style="width:26px;height:26px;border-radius:50%;border:1.5px solid rgba(124,92,255,.4);" />
-        <span style="font-weight:600;color:var(--fg-0)">@<%= user.username %></span>
-      </a>
-      <a href="/dashboard" class="btn-primary nav-cta">Mon dashboard</a>
-    <% } else { %>
-      <a href="/login" class="btn-ghost">Connexion</a>
-      <a href="/login" class="btn-primary nav-cta">Commencer — Gratuit</a>
-    <% } %>
-  </div>
-</nav>
-<div class="nav-overlay" id="navOverlay"></div>
-
-<!-- HERO — split layout -->
-<section class="hero" id="hero">
-  <div class="hero-bg" aria-hidden="true">
-    <div class="aurora aurora-1"></div>
-    <div class="aurora aurora-2"></div>
-    <div class="aurora aurora-3"></div>
-    <div class="grid-overlay"></div>
-    <canvas id="particleCanvas"></canvas>
-  </div>
-
-  <div class="hero-inner">
-    <div class="hero-copy">
-      <div class="badge-pill">
-        <i class="fa-solid fa-bolt"></i>
-        100% Gratuit &middot; Toujours
-      </div>
-      <h1 class="hero-title">
-        Tous vos<br />
-        liens sur<br />
-        <span class="gradient-text" id="gradientWord">une seule page.</span>
-      </h1>
-      <p class="hero-sub">
-        Réseaux sociaux, portfolio, boutique, Discord&hellip; Réunissez tout sur
-        une page à votre image. Personnalisation complète.
-        <strong>Gratuit et sans mensonge.</strong>
-      </p>
-      <div class="hero-cta">
-        <a href="/login" class="btn-hero">
-          Créer ma page
-          <i class="fa-solid fa-arrow-right"></i>
-        </a>
-        <a href="#demo" class="btn-ghost-hero">
-          <i class="fa-solid fa-play"></i>
-          Voir la démo
-        </a>
-      </div>
-      <div class="floating-tags">
-        <span class="tag"><i class="fa-solid fa-palette"></i> Thèmes</span>
-        <span class="tag"><i class="fa-solid fa-wand-magic-sparkles"></i> Effets</span>
-        <span class="tag"><i class="fa-solid fa-font"></i> Polices</span>
-        <span class="tag"><i class="fa-solid fa-link"></i> Liens illimités</span>
-        <span class="tag"><i class="fa-solid fa-chart-line"></i> Analytics</span>
-        <span class="tag"><i class="fa-solid fa-mobile-screen"></i> Responsive</span>
-      </div>
-    </div>
-
-    <div class="hero-mockup" id="heroMockup">
-      <div class="mac-window" id="macWindow">
-        <div class="mac-bar">
-          <div class="mac-dots">
-            <span class="dot dot-red" title="Fermer"></span>
-            <span class="dot dot-yellow" title="Réduire"></span>
-            <span class="dot dot-green" title="Agrandir"></span>
-          </div>
-          <div class="mac-url-bar">
-            <i class="fa-solid fa-lock" style="font-size:.6rem;color:#4ade80;"></i>
-            link2me.fr/<%= demoProfile.username %>
-          </div>
-          <div style="width:52px"></div>
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="hero-grid"></div>
+            <div class="hero-glow hero-glow-1"></div>
+            <div class="hero-glow hero-glow-2"></div>
+            <div class="hero-particles" id="heroParticles"></div>
         </div>
-        <div class="mac-content">
-          <canvas id="snowCanvas" class="snow-canvas"></canvas>
-          <div class="profile-card">
-            <div class="profile-glow"></div>
-            <div class="profile-avatar-wrap">
-              <img src="<%= demoProfile.avatarUrl %>" alt="avatar" class="profile-avatar" width="80" height="80" />
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                Nouveau — Plus de 50 effets visuels
             </div>
-            <h3 class="profile-username">@<%= demoProfile.username %></h3>
-            <p class="profile-bio"><%= demoProfile.bio %></p>
-            <div class="profile-style-tag">
-              <i class="fa-solid fa-sparkles" style="font-size:.7rem;"></i>
-              <%= demoProfile.style %>
+            <h1 class="hero-title">
+                Crée le profil
+                <span class="hero-title-gradient">le plus stylé</span>
+                <br>de tous les temps
+            </h1>
+            <p class="hero-subtitle">
+                Guns.io te permet de créer une page de liens unique avec des effets visuels incroyables,
+                des polices personnalisées, des badges exclusifs, et bien plus. Le tout gratuitement.
+            </p>
+            <div class="hero-actions">
+                <a href="/auth/github" class="btn btn-primary btn-glow">
+                    <i class="fa-brands fa-github"></i>
+                    Commencer gratuitement
+                </a>
+                <a href="#demo" class="btn btn-ghost">
+                    <i class="fa-solid fa-play"></i>
+                    Voir la démo
+                </a>
             </div>
-            <div class="profile-links">
-              <% demoProfile.links.forEach(link => { %>
-              <a href="<%= link.url %>" class="profile-link" style="--lc:<%= link.color %>">
-                <i class="<%= link.fa %> link-icon" style="color:<%= link.color %>"></i>
-                <span class="link-label"><%= link.label %></span>
-                <i class="fa-solid fa-arrow-right link-arrow"></i>
-              </a>
-              <% }) %>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number">10K+</span>
+                    <span class="hero-stat-label">Profils créés</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">50+</span>
+                    <span class="hero-stat-label">Effets visuels</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">100%</span>
+                    <span class="hero-stat-label">Gratuit</span>
+                </div>
             </div>
-            <div class="profile-footer-badge">
-              <img src="/static/img/favicon.svg" width="13" height="13" alt="" />
-              <span>Fait avec link2me</span>
-            </div>
-          </div>
         </div>
-      </div>
-      <div class="deco deco-1"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-      <div class="deco deco-2"><i class="fa-solid fa-palette"></i></div>
-      <div class="deco deco-3"><i class="fa-solid fa-link"></i></div>
-      <div class="deco deco-4"><i class="fa-brands fa-discord"></i></div>
-    </div>
-  </div>
-</section>
-
-<!-- STATS -->
-<section class="stats-section" id="stats">
-  <div class="stats-grid">
-    <% stats.forEach((s, i) => { %>
-    <div class="stat-card" data-anim style="--d:<%=i*0.1%>s">
-      <div class="stat-value"><%= s.value %></div>
-      <div class="stat-label"><%= s.label %></div>
-    </div>
-    <% }) %>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="features-section" id="features">
-  <div class="section-header">
-    <div class="section-label"><i class="fa-solid fa-circle-dot"></i> Fonctionnalités</div>
-    <h2 class="section-title">Pourquoi choisir <span class="accent">link2me</span> ?</h2>
-    <p class="section-sub">Tout ce qu'il vous faut, rien de superflu.</p>
-  </div>
-
-  <div class="features-grid">
-    <div class="feature-card feature-hero-card" data-anim>
-      <div class="feature-icon"><i class="fa-solid fa-palette"></i></div>
-      <h3>Personnalisation totale</h3>
-      <p>Couleurs, polices, effets, animations, fonds&hellip; Faites de votre page une extension de votre identité.</p>
-    </div>
-    <div class="feature-card" data-anim>
-      <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
-      <h3>Ultra rapide</h3>
-      <p>Pages optimisées pour charger en moins d'une seconde. Vos visiteurs n'attendent jamais.</p>
-    </div>
-    <div class="feature-card" data-anim>
-      <div class="feature-icon"><i class="fa-solid fa-link"></i></div>
-      <h3>Liens illimités</h3>
-      <p>Ajoutez autant de liens que vous le souhaitez. Réseaux, boutiques, portfolios, tout y est.</p>
-    </div>
-    <div class="feature-card" data-anim>
-      <div class="feature-icon"><i class="fa-solid fa-face-smile"></i></div>
-      <h3>Vraiment gratuit</h3>
-      <p>Pas de freemium caché, pas d'abonnement déguisé. link2me est gratuit. Point.</p>
-    </div>
-    <div class="feature-card" data-anim>
-      <div class="feature-icon"><i class="fa-solid fa-chart-bar"></i></div>
-      <h3>Analytics intégrés</h3>
-      <p>Voyez combien de personnes visitent votre page et cliquent sur vos liens en temps réel.</p>
-    </div>
-    <div class="feature-card" data-anim>
-      <div class="feature-icon"><i class="fa-solid fa-mobile-screen"></i></div>
-      <h3>100% Mobile Ready</h3>
-      <p>Votre page est parfaite sur tous les écrans. Téléphones, tablettes, ordinateurs.</p>
-    </div>
-  </div>
-</section>
-
-<!-- DEMO SECTION -->
-<section class="demo-section" id="demo">
-  <div class="section-header">
-    <div class="section-label"><i class="fa-solid fa-eye"></i> Aperçu en direct</div>
-    <h2 class="section-title">Votre page, <span class="accent">votre style</span></h2>
-    <p class="section-sub">Exemple de ce que vous pouvez créer en moins de 2 minutes.</p>
-  </div>
-
-  <div class="demo-themes">
-    <button class="theme-btn active" data-theme="neon">Neon Pulse</button>
-    <button class="theme-btn" data-theme="aurora">Aurora</button>
-    <button class="theme-btn" data-theme="midnight">Midnight</button>
-    <button class="theme-btn" data-theme="cyber">Cyber</button>
-  </div>
-
-  <div class="demo-preview">
-    <div class="mac-window">
-      <div class="mac-bar">
-        <div class="mac-dots">
-          <span class="dot dot-red"></span>
-          <span class="dot dot-yellow"></span>
-          <span class="dot dot-green"></span>
+        <div class="hero-scroll">
+            <span>Scroll</span>
+            <i class="fa-solid fa-chevron-down"></i>
         </div>
-        <div class="mac-url-bar">
-          <i class="fa-solid fa-lock" style="font-size:.6rem;color:#4ade80;"></i>
-          link2me.fr/<%= demoProfile.username %>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-header">
+            <span class="section-tag">Fonctionnalités</span>
+            <h2 class="section-title">Tout ce dont tu as besoin<span class="text-gradient"> pour briller</span></h2>
+            <p class="section-desc">Des outils puissants pour créer un profil qui te ressemble vraiment.</p>
         </div>
-        <div style="width:52px"></div>
-      </div>
-      <div class="mac-content" id="demoMacContent">
-        <div class="profile-card" id="demoCard">
-          <div class="profile-glow"></div>
-          <div class="profile-avatar-wrap">
-            <img src="<%= demoProfile.avatarUrl %>" alt="avatar" class="profile-avatar" width="80" height="80" />
-          </div>
-          <h3 class="profile-username">@<%= demoProfile.username %></h3>
-          <p class="profile-bio"><%= demoProfile.bio %></p>
-          <div class="profile-style-tag" id="demoStyleTag">
-            <i class="fa-solid fa-sparkles" style="font-size:.7rem;"></i>
-            <span id="demoStyleLabel"><%= demoProfile.style %></span>
-          </div>
-          <div class="profile-links">
-            <% demoProfile.links.forEach(link => { %>
-            <a href="<%= link.url %>" class="profile-link" style="--lc:<%= link.color %>">
-              <i class="<%= link.fa %> link-icon" style="color:<%= link.color %>"></i>
-              <span class="link-label"><%= link.label %></span>
-              <i class="fa-solid fa-arrow-right link-arrow"></i>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h3>Effets Visuels</h3>
+                <p>Plus de 50 effets : glitch, neon, gradient, blur, parallax, particules, et bien plus.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-font"></i>
+                </div>
+                <h3>Polices Personnalisées</h3>
+                <p>15+ polices Google Fonts pour donner du caractère à ton profil.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h3>Badges Exclusifs</h3>
+                <p>Débloque des badges uniques et affiche-les fièrement sur ton profil.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-music"></i>
+                </div>
+                <h3>Musique Intégrée</h3>
+                <p>Ajoute tes morceaux préférés depuis Deezer et YouTube directement sur ton profil.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-palette"></i>
+                </div>
+                <h3>Thèmes & Couleurs</h3>
+                <p>Des dizaines de thèmes et la possibilité de tout customiser comme tu veux.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-chart-simple"></i>
+                </div>
+                <h3>Statistiques</h3>
+                <p>Track tes vues, tes clics, et découvre d'où viennent tes visiteurs.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo / Preview Section -->
+    <section class="demo" id="demo">
+        <div class="section-header">
+            <span class="section-tag">Aperçu</span>
+            <h2 class="section-title">Un aperçu de ce que <span class="text-gradient">tu peux créer</span></h2>
+            <p class="section-desc">Voici à quoi pourrait ressembler ton profil avec Guns.io.</p>
+        </div>
+        <div class="demo-preview">
+            <div class="demo-frame">
+                <div class="demo-frame-header">
+                    <div class="demo-frame-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="demo-frame-url">guns.io/tonpseudo</div>
+                </div>
+                <div class="demo-frame-content">
+                    <div class="demo-profile">
+                        <div class="demo-avatar-wrapper">
+                            <div class="demo-avatar">
+                                <span class="demo-avatar-text">T</span>
+                            </div>
+                            <div class="demo-badge demo-badge-gold">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                        </div>
+                        <h3 class="demo-name">TonPseudo</h3>
+                        <p class="demo-bio">Développeur & Créateur de contenu • Guns.io addict 🔥</p>
+                        <div class="demo-links">
+                            <a href="#" class="demo-link">
+                                <i class="fa-brands fa-github"></i>
+                                <span>GitHub</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                            <a href="#" class="demo-link">
+                                <i class="fa-brands fa-youtube"></i>
+                                <span>YouTube</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                            <a href="#" class="demo-link">
+                                <i class="fa-brands fa-discord"></i>
+                                <span>Discord</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                            <a href="#" class="demo-link">
+                                <i class="fa-brands fa-x-twitter"></i>
+                                <span>Twitter / X</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="demo-music">
+                            <div class="demo-music-player">
+                                <i class="fa-solid fa-music"></i>
+                                <div class="demo-music-info">
+                                    <span class="demo-music-title">Blinding Lights</span>
+                                    <span class="demo-music-artist">The Weeknd</span>
+                                </div>
+                                <div class="demo-music-visualizer">
+                                    <span></span><span></span><span></span><span></span><span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials / Reviews -->
+    <section class="reviews" id="reviews">
+        <div class="section-header">
+            <span class="section-tag">Avis</span>
+            <h2 class="section-title">Ce que nos utilisateurs <span class="text-gradient">en pensent</span></h2>
+        </div>
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="review-stars">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <p class="review-text">"Franchement, c'est le meilleur créateur de page de liens que j'ai testé. Les effets sont oufs !"</p>
+                <div class="review-author">
+                    <span class="review-author-name">@streamer_fr</span>
+                    <span class="review-author-role">Streamer Twitch</span>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <p class="review-text">"J'ai switché de gun.lol à Guns.io et franchement aucune déception. C'est juste mieux sur tous les points."</p>
+                <div class="review-author">
+                    <span class="review-author-name">@dev_creative</span>
+                    <span class="review-author-role">Développeur</span>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <p class="review-text">"Le support est réactif, les features sont dingues, et tout ça gratuitement. Que demander de plus ?"</p>
+                <div class="review-author">
+                    <span class="review-author-name">@design_addict</span>
+                    <span class="review-author-role">Designer UI/UX</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="section-header">
+            <span class="section-tag">FAQ</span>
+            <h2 class="section-title">Questions <span class="text-gradient">fréquentes</span></h2>
+        </div>
+        <div class="faq-list">
+            <details class="faq-item">
+                <summary>
+                    <span>C'est vraiment gratuit ?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </summary>
+                <p>Oui, Guns.io est 100% gratuit. Pas de plans payants cachés, pas de fonctionnalités premium. Tout est accessible à tous.</p>
+            </details>
+            <details class="faq-item">
+                <summary>
+                    <span>Comment ça se compare à gun.lol ?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </summary>
+                <p>Guns.io offre plus d'effets visuels, plus de polices, une recherche musicale intégrée (Deezer + YouTube), et une interface plus moderne. Le tout gratuitement.</p>
+            </details>
+            <details class="faq-item">
+                <summary>
+                    <span>Puis-je utiliser mon propre domaine ?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </summary>
+                <p>Pas encore, mais c'est une fonctionnalité prévue prochainement. Pour l'instant, ton profil est accessible via guns.io/tonpseudo.</p>
+            </details>
+            <details class="faq-item">
+                <summary>
+                    <span>Mes données sont-elles sécurisées ?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </summary>
+                <p>Absolument. Nous utilisons OAuth via GitHub pour l'authentification, et toutes les données sont chiffrées et stockées de manière sécurisée.</p>
+            </details>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="cta">
+        <div class="cta-content">
+            <h2>Prêt à créer le profil <span class="text-gradient">le plus stylé</span> ?</h2>
+            <p>Rejoins plus de 10 000 utilisateurs qui ont déjà choisi Guns.io.</p>
+            <a href="/auth/github" class="btn btn-primary btn-glow btn-large">
+                <i class="fa-brands fa-github"></i>
+                Créer mon profil gratuitement
             </a>
-            <% }) %>
-          </div>
-          <div class="profile-footer-badge">
-            <img src="/static/img/favicon.svg" width="13" height="13" alt="" />
-            <span>Fait avec link2me</span>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- REVIEWS -->
-<section class="reviews-section" id="reviews">
-  <div class="section-header">
-    <div class="section-label"><i class="fa-solid fa-star"></i> Témoignages</div>
-    <h2 class="section-title">Ils ont rejoint <span class="accent">link2me</span></h2>
-  </div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="/" class="footer-logo">
+                    <i class="fa-solid fa-gun"></i>
+                    Guns.io
+                </a>
+                <p>Le meilleur créateur de pages de liens.</p>
+            </div>
+            <div class="footer-links">
+                <a href="/legal">Mentions légales</a>
+                <a href="/legal#privacy">Confidentialité</a>
+                <a href="/legal#terms">Conditions</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; <%= new Date().getFullYear() %> Guns.io — Fait avec <i class="fa-solid fa-heart"></i> pour la communauté</p>
+        </div>
+    </footer>
 
-  <div class="reviews-wrapper">
-    <div class="reviews-track" id="reviewsTrack">
-      <% [...reviews, ...reviews].forEach(r => { %>
-      <div class="review-card">
-        <div class="review-stars">
-          <% for(let i=0;i<r.stars;i++) { %><i class="fa-solid fa-star"></i><% } %>
-        </div>
-        <p class="review-text">"<%= r.text %>"</p>
-        <div class="review-author">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<%= r.seed %>&backgroundColor=0f1628"
-               alt="<%= r.name %>" class="review-avatar" width="32" height="32" />
-          <span><%= r.name %></span>
-        </div>
-      </div>
-      <% }) %>
-    </div>
-  </div>
-</section>
-
-<!-- CTA -->
-<section class="cta-section">
-  <div class="cta-glow" aria-hidden="true"></div>
-  <div class="cta-content">
-    <h2 class="cta-title">Prêt à créer votre page ?</h2>
-    <p class="cta-sub">Rejoignez des milliers de créateurs. Gratuit, pour toujours.</p>
-    <a href="/login" class="btn-hero">
-      Créer mon link2me
-      <i class="fa-solid fa-arrow-right"></i>
-    </a>
-    <div class="cta-social-proof">
-      <div class="mini-avatars">
-        <% ['s1','s2','s3','s4','s5'].forEach(s => { %>
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<%= s %>&backgroundColor=0f1628" width="28" height="28" alt="" />
-        <% }) %>
-      </div>
-      <span>Rejoignez <strong>+2 000</strong> créateurs actifs</span>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div class="footer-brand-block">
-        <div class="footer-brand">
-          <img src="/static/img/favicon.svg" width="28" height="28" alt="link2me" />
-          <span>link2me</span>
-        </div>
-        <p class="footer-tagline">Tous vos liens. Une seule page.</p>
-      </div>
-      <div class="footer-links-block">
-        <div class="footer-col">
-          <div class="footer-col-title">Produit</div>
-          <a href="#features">Fonctionnalités</a>
-          <a href="#demo">Démo</a>
-          <a href="/login">Créer un compte</a>
-        </div>
-        <div class="footer-col">
-          <div class="footer-col-title">Légal</div>
-          <a href="/terms">Conditions d'utilisation</a>
-          <a href="/privacy">Politique de confidentialité</a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>&copy; <%= new Date().getFullYear() %> link2me. Tous droits réservés.</span>
-      <div class="footer-socials">
-        <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-        <a href="<%= locals.SocialLinks ? SocialLinks.url('discord', 'bv2wecBBSs') : '#' %>" aria-label="Discord"><i class="fa-brands fa-discord"></i></a>
-        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-      </div>
-    </div>
-  </div>
-</footer>
-
-<script src="/static/js/landing.js" defer></script>
+    <!-- Scripts -->
+    <script src="/static/js/landing.js"></script>
+    <script src="/static/js/effects.js"></script>
 </body>
 </html>

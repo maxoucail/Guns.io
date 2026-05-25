@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /editor
+Disallow: /onboarding
+Disallow: /auth/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://link2me.fr/sitemap.xml
+
+# Crawl delay (optionnel)
+Crawl-delay: 1
